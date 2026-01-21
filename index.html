@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarryPoints - 创意云集</title>
+  <link rel="icon" type="image/svg+xml" href="CloudPalette.svg">
+  <link rel="alternate icon" type="image/x-icon" href="CloudPalette.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      overflow-x: hidden;
+    }
+
+    /* 星空背景动画 */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .star {
+      position: absolute;
+      background: #ffffff;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+
+    .star:nth-child(1) { top: 20%; left: 10%; width: 2px; height: 2px; animation-delay: 0s; }
+    .star:nth-child(2) { top: 30%; left: 80%; width: 1px; height: 1px; animation-delay: 1s; }
+    .star:nth-child(3) { top: 60%; left: 20%; width: 3px; height: 3px; animation-delay: 2s; }
+    .star:nth-child(4) { top: 80%; left: 70%; width: 1px; height: 1px; animation-delay: 0.5s; }
+    .star:nth-child(5) { top: 40%; left: 50%; width: 2px; height: 2px; animation-delay: 1.5s; }
+    .star:nth-child(6) { top: 70%; left: 90%; width: 1px; height: 1px; animation-delay: 2.5s; }
+    .star:nth-child(7) { top: 15%; left: 60%; width: 2px; height: 2px; animation-delay: 0.8s; }
+    .star:nth-child(8) { top: 85%; left: 30%; width: 1px; height: 1px; animation-delay: 1.8s; }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* 顶栏导航 */
+    .top-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.6rem 2rem;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .contact-btn {
+      position: absolute;
+      right: 2rem;
+      color: #b0b0b0;
+      text-decoration: none;
+      font-size: 1rem;
+      font-weight: 500;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .contact-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .nav-item {
+      color: #b0b0b0;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 0.5rem 1.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav-item:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item.active {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .nav-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 4px;
+      background: #ffffff;
+      border-radius: 50%;
+    }
+
+    /* 主容器 */
+    .container {
+      text-align: center;
+      z-index: 10;
+      position: relative;
+      margin-top: 4rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transform: translateY(-3rem);
+    }
+
+    /* 内容区域 */
+    .content {
+      display: none;
+    }
+
+    .content.active {
+      display: block;
+    }
+
+    /* 标题 */
+    .title {
+      font-size: 4rem;
+      font-weight: 300;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #ffffff, #a8a8a8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.1em;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #b0b0b0;
+      margin-bottom: 4rem;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    /* 入口按钮 */
+    .entry-buttons {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .entry-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      padding: 1.5rem 3rem;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      min-width: 200px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .entry-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .entry-button:hover::before {
+      left: 100%;
+    }
+
+    .entry-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .entry-button:active {
+      transform: translateY(0);
+    }
+
+    /* 探索按钮特殊样式 */
+    .explore-btn {
+      background: linear-gradient(135deg, rgba(74, 144, 226, 0.3), rgba(80, 200, 120, 0.3));
+      border-color: rgba(74, 144, 226, 0.5);
+    }
+
+    .explore-btn:hover {
+      background: linear-gradient(135deg, rgba(74, 144, 226, 0.5), rgba(80, 200, 120, 0.5));
+      border-color: rgba(74, 144, 226, 0.7);
+    }
+
+    /* 专业模式按钮特殊样式 */
+    .professional-btn {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.3), rgba(255, 159, 64, 0.3));
+      border-color: rgba(255, 107, 107, 0.5);
+    }
+
+    .professional-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 107, 107, 0.5), rgba(255, 159, 64, 0.5));
+      border-color: rgba(255, 107, 107, 0.7);
+    }
+
+    /* StarryPoints 介绍页面样式 */
+    .intro-content {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .intro-title {
+      font-size: 5rem;
+      font-weight: 200;
+      margin-bottom: 2rem;
+      background: linear-gradient(45deg, #ffffff, #a8a8a8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.1em;
+    }
+
+    .intro-description {
+      font-size: 1.3rem;
+      color: #b0b0b0;
+      line-height: 1.8;
+      font-weight: 300;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .top-nav {
+        padding: 0.5rem 1rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .nav-center {
+        gap: 1rem;
+      }
+
+      .nav-item {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .contact-btn {
+        font-size: 0.9rem;
+        padding: 0.3rem 0.8rem;
+      }
+
+      .container {
+        margin-top: 3.5rem;
+        padding: 0 1rem;
+      }
+
+      .title, .intro-title {
+        font-size: 2.5rem;
+      }
+      
+      .subtitle, .intro-description {
+        font-size: 1rem;
+        margin-bottom: 3rem;
+      }
+      
+      .entry-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      
+      .entry-button {
+        min-width: 250px;
+        padding: 1.2rem 2rem;
+      }
+
+    }
+
+    /* 底部装饰 */
+    .footer {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #666;
+      font-size: 0.9rem;
+      z-index: 10;
+      display: none;
+    }
+
+    .footer.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶栏导航 -->
+  <nav class="top-nav">
+    <div class="nav-center">
+      <a href="#" class="nav-item active" data-tab="starrypoints">StarryPoints</a>
+      <a href="#" class="nav-item" data-tab="cloudpalette">CloudPalette</a>
+    </div>
+    <a href="contact.html" class="contact-btn">Contact</a>
+  </nav>
+
+  <!-- 星空背景 -->
+  <div class="stars">
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+    <div class="star"></div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="container">
+    <!-- StarryPoints 介绍页面 -->
+    <div class="content active" id="starrypoints">
+      <div class="intro-content">
+        <h1 class="intro-title">StarryPoints</h1>
+        <p class="intro-description">
+          一个专注于创意工具集合的平台，致力于为设计师和创作者提供最优质的创意工具。
+          我们相信每一个创意都值得被完美呈现，每一个想法都值得被精心雕琢。
+        </p>
+      </div>
+    </div>
+
+    <!-- CloudPalette 配色工具页面 -->
+    <div class="content" id="cloudpalette">
+      <h1 class="title">CloudPalette</h1>
+      <p class="subtitle">探索色彩的无限可能</p>
+      
+      <div class="entry-buttons">
+        <a href="explore.html" class="entry-button explore-btn">
+          🌟 探索模式
+        </a>
+        <a href="professional.html" class="entry-button professional-btn">
+          ⚡ 专业模式
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部信息 -->
+  <div class="footer" id="cloudpalette-footer">
+    <p>云彩配色 · 让创意无限闪耀</p>
+  </div>
+  <div class="footer" id="starrypoints-footer">
+    <p>创意云集 · 肆意书写</p>
+  </div>
+
+  <script>
+    // 标签页切换功能
+    document.addEventListener('DOMContentLoaded', function() {
+      const navItems = document.querySelectorAll('.nav-item');
+      const contents = document.querySelectorAll('.content');
+      const cloudpaletteFooter = document.getElementById('cloudpalette-footer');
+      const starrypointsFooter = document.getElementById('starrypoints-footer');
+
+      navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // 移除所有活动状态
+          navItems.forEach(nav => nav.classList.remove('active'));
+          contents.forEach(content => content.classList.remove('active'));
+          
+          // 隐藏所有底部文字
+          cloudpaletteFooter.classList.remove('show');
+          starrypointsFooter.classList.remove('show');
+          
+          // 添加当前活动状态
+          this.classList.add('active');
+          const targetTab = this.getAttribute('data-tab');
+          const targetContent = document.getElementById(targetTab);
+          if (targetContent) {
+            targetContent.classList.add('active');
+          }
+          
+          // 控制底部文字显示
+          if (targetTab === 'cloudpalette') {
+            cloudpaletteFooter.classList.add('show');
+          } else if (targetTab === 'starrypoints') {
+            starrypointsFooter.classList.add('show');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

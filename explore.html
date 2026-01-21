@@ -1,0 +1,3252 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title> 云彩配色</title>
+  <link rel="icon" type="image/svg+xml" href="CloudPalette.svg">
+  <link rel="alternate icon" type="image/x-icon" href="CloudPalette.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部工具栏 */
+    .toolbar {
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .logo:hover {
+      color: #007bff;
+    }
+    .logo img {
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .control-group input,
+    .control-group select {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: white;
+      transition: border-color 0.2s ease;
+    }
+
+    .control-group input:focus,
+    .control-group select:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .generate-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      background: #007bff;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-weight: 500;
+    }
+
+    .generate-btn:hover {
+      background: #0056b3;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      z-index: 300;
+    }
+
+    .action-btn {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      color: #666;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+      z-index: 400;
+    }
+
+    .action-btn:hover {
+      background: #f8f9fa;
+      border-color: #007bff;
+      color: #007bff;
+    }
+
+    /* 暗色模式 */
+    body.dark {
+      background: #2d2d2d;
+      color: #e6e6e6;
+    }
+
+    body.dark .toolbar {
+      background: #3a3a3a;
+      border-bottom: 1px solid #4a4a4a;
+      box-shadow: none;
+    }
+
+    body.dark .logo { color: #e6e6e6; }
+    
+    body.dark .logo:hover {
+      color: #4dabf7;
+    }
+
+    body.dark .control-group label { color: #c8c8c8; }
+
+    body.dark .control-group input,
+    body.dark .control-group select {
+      background: #2a2a2a;
+      color: #e6e6e6;
+      border-color: #4a4a4a;
+      min-width: 80px;
+    }
+
+    body.dark .control-group input:focus,
+    body.dark .control-group select:focus {
+      border-color: #4c8dff;
+    }
+
+    body.dark .generate-btn { background: #3b82f6; }
+    body.dark .generate-btn:hover { background: #1d4ed8; }
+
+    body.dark .info-bar {
+      background: #2a2a2a;
+      border-top: 1px solid #4a4a4a;
+      color: #ffffff;
+    }
+
+    body.dark .info-item { color: #ffffff; }
+    body.dark .info-item strong { color: #ffffff; }
+    body.dark .palette-type { color: #ffffff; }
+
+    body.dark .action-btn {
+      background: #3a3a3a;
+      color: #c8c8c8;
+      border-color: #4a4a4a;
+    }
+    body.dark .action-btn:hover {
+      background: #4a4a4a;
+      border-color: #4c8dff;
+      color: #4c8dff;
+    }
+
+    body.dark .history-content { background: #3a3a3a; }
+    body.dark .history-item { background: #2a2a2a; border-color: #4a4a4a; }
+    body.dark .close-btn { color: #aaaaaa; }
+    body.dark .close-btn:hover { background: #4a4a4a; }
+
+    /* 主配色区域 */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+      min-height: calc(100vh - 140px);
+    }
+
+    .palette-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* 模式选择器样式 */
+    .mode-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      color: #666;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+    }
+
+    .mode-btn:hover {
+      border-color: #007bff;
+      color: #007bff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    }
+
+    .mode-btn.active {
+      border-color: #007bff;
+      background: #007bff;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    }
+
+    .mode-btn .mode-icon {
+      font-size: 16px;
+    }
+
+    .mode-btn .mode-text {
+      font-weight: 600;
+    }
+
+    /* 暗色模式支持 */
+    body.dark .mode-btn {
+      background: #3a3a3a;
+      color: #c8c8c8;
+      border-color: #4a4a4a;
+    }
+
+    body.dark .mode-btn:hover {
+      border-color: #4c8dff;
+      color: #4c8dff;
+      box-shadow: 0 4px 12px rgba(76, 141, 255, 0.15);
+    }
+
+    body.dark .mode-btn.active {
+      border-color: #4c8dff;
+      background: #4c8dff;
+      color: white;
+      box-shadow: 0 4px 12px rgba(76, 141, 255, 0.3);
+    }
+
+    .palette {
+      display: flex;
+      width: 100%;
+      height: 260px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 24px;
+    }
+
+    .color-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: visible;
+    }
+
+    .color-box:hover {
+      transform: scale(1.02);
+    }
+
+    .color-box .color-code {
+      font-size: 14px;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .color-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(255, 255, 255, 0.98);
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 6px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px) scale(0.95) translateZ(1px);
+      pointer-events: auto;
+      width: 42px;
+      height: auto;
+      max-height: calc(100% - 16px);
+    }
+
+    .color-box:hover .color-actions {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1) translateZ(1px);
+    }
+
+    /* 确保按钮在悬停时始终可见 */
+    .color-box:hover {
+      position: relative;
+    }
+
+    .color-box:hover .color-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+
+    /* 确保按钮容器不会被其他元素遮挡 */
+    .color-box {
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    .color-box:hover {
+      z-index: 9998;
+    }
+
+    /* 确保按钮容器完全可见 */
+    .color-actions {
+      overflow: visible;
+    }
+
+    /* 确保按钮容器不会被父容器裁剪 */
+    .palette {
+      overflow: visible;
+      position: relative;
+    }
+
+    .palette-container {
+      overflow: visible;
+      position: relative;
+    }
+
+    /* 使用transform3d来创建新的层叠上下文 */
+    .color-box {
+      transform: translateZ(0);
+    }
+
+    /* 确保按钮容器完全可见且不被裁剪 */
+    .color-actions {
+      transform: translateZ(1px);
+      clip-path: none;
+      -webkit-clip-path: none;
+    }
+
+    /* 确保所有父容器都不会裁剪子元素 */
+    .main-content {
+      overflow: visible;
+    }
+
+    .color-action-btn {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 10px;
+      cursor: pointer;
+      color: #333;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      font-weight: 500;
+      position: relative;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .color-action-btn:hover {
+      background: white;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+      border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    .color-action-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* 移动端触摸优化 */
+    @media (hover: none) and (pointer: coarse) {
+      .color-actions {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+      }
+      
+      .color-action-btn {
+        width: 36px;
+        height: 36px;
+        padding: 8px 6px;
+      }
+      
+      
+      .color-action-btn .text {
+        font-size: 8px;
+      }
+    }
+
+    .color-action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: rgba(255, 255, 255, 0.6);
+      transform: none;
+    }
+
+    .color-action-btn:disabled:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    body.dark .color-actions {
+      background: rgba(45, 45, 45, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+    }
+    
+    body.dark .color-action-btn {
+      background: rgba(60, 60, 60, 0.9);
+      color: #e6e6e6;
+      border-color: rgba(255, 255, 255, 0.1);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    body.dark .color-action-btn:hover {
+      background: rgba(80, 80, 80, 0.95);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    body.dark .color-action-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: rgba(45, 45, 45, 0.6);
+    }
+
+    body.dark .color-action-btn:disabled:hover {
+      transform: none;
+      box-shadow: none;
+      background: rgba(45, 45, 45, 0.6);
+    }
+
+
+    .color-action-btn .text {
+      font-size: 8px;
+      font-weight: 600;
+      line-height: 1;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* .color-box .color-name 已移除显示 */
+
+    /* 底部信息栏 */
+    .info-bar {
+      background: #f8f9fa;
+      border-top: 1px solid #e0e0e0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      position: relative;
+      z-index: 150;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .info-item strong {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .palette-type {
+      color: #333;
+      font-weight: 500;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 8px;
+      position: relative;
+      z-index: 300;
+    }
+
+    /* 复制提示 */
+    .copy-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      font-size: 14px;
+    }
+
+    .copy-notification.show {
+      transform: translateX(0);
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .toolbar {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+      }
+
+      .toolbar-left,
+      .toolbar-right {
+        justify-content: center;
+      }
+
+      .controls {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .main-content {
+        padding: 20px 16px;
+      }
+
+      .palette {
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .color-box .color-code {
+        font-size: 12px;
+      }
+
+      .color-box .color-name {
+        font-size: 10px;
+      }
+
+      .info-bar {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .control-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .control-group label {
+        text-align: center;
+      }
+
+      .palette {
+        height: 160px;
+        overflow: hidden;
+      }
+
+      .color-box .color-code {
+        font-size: 10px;
+      }
+
+      .color-box .color-name {
+        font-size: 8px;
+      }
+      
+      .color-actions {
+        top: 4px;
+        right: 4px;
+        padding: 4px;
+        gap: 2px;
+        flex-direction: column;
+        width: 36px;
+        max-height: calc(100% - 8px);
+      }
+      
+      .color-action-btn {
+        padding: 4px 2px;
+        font-size: 10px;
+        width: 28px;
+        height: 28px;
+        gap: 1px;
+      }
+      
+      
+      .color-action-btn .text {
+        font-size: 6px;
+        letter-spacing: 0.2px;
+      }
+    }
+
+    /* 历史记录模态框样式 */
+    .history-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .history-modal.show {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .history-content {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #eee;
+      background: #f8f9fa;
+    }
+
+    .history-header h3 {
+      margin: 0;
+      color: #333;
+      font-size: 18px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #f3f4f6;
+    }
+
+    /* 禁用状态的输入框样式 */
+    input[type="number"]:disabled,
+    select:disabled {
+      background-color: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    /* 暗色模式下的禁用状态 */
+    body.dark input[type="number"]:disabled,
+    body.dark select:disabled {
+      background-color: #4a5568;
+      color: #a0aec0;
+      opacity: 0.7;
+    }
+
+    /* 禁用状态的标签样式 */
+    .control-group label {
+      transition: opacity 0.3s ease;
+    }
+
+    /* 禁用状态的整个控制组样式 */
+    .control-group {
+      transition: opacity 0.3s ease;
+    }
+
+    .history-list {
+      padding: 20px;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: #fff;
+      transition: box-shadow 0.2s;
+    }
+
+    .history-item:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .history-colors {
+      display: flex;
+      gap: 8px;
+      margin-right: 16px;
+    }
+
+    .history-color {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .history-color:hover {
+      transform: scale(1.1);
+    }
+
+    .history-info {
+      flex: 1;
+    }
+
+    .history-type {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .history-time {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .history-btn {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .history-btn:hover {
+      background: #f8f9fa;
+      border-color: #007bff;
+    }
+
+    .history-btn.apply {
+      background: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+
+    .history-btn.apply:hover {
+      background: #0056b3;
+    }
+
+    @media (max-width: 768px) {
+      .history-content {
+        width: 95%;
+        margin: 20px;
+      }
+
+      .history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .history-colors {
+        margin-right: 0;
+        margin-bottom: 8px;
+      }
+
+      .history-actions {
+        width: 100%;
+        justify-content: flex-end;
+      }
+    }
+
+    /* 保存模态框样式 */
+    .save-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .save-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .save-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      color: #495057;
+    }
+
+    .save-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .save-options {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .save-option-btn {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      border: 2px solid #e5e5e5;
+      border-radius: 12px;
+      background: #fafbfc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .save-option-btn:hover {
+      border-color: #d1d5db;
+      background: #f1f3f4;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+
+    .save-option-btn .text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #374151;
+      width: 100%;
+    }
+
+    .save-option-btn .desc {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .save-option-btn .text,
+    .save-option-btn .desc {
+      display: block;
+    }
+
+    /* 暗色模式支持 */
+    .dark .save-content {
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    .dark .save-header {
+      background: linear-gradient(135deg, #4b5563 0%, #6b7280 100%);
+      color: #f9fafb;
+      border-bottom: 1px solid #4b5563;
+    }
+
+    .dark .save-option-btn {
+      background: #4b5563;
+      border-color: #6b7280;
+      color: #f9fafb;
+    }
+
+    .dark .save-option-btn:hover {
+      background: #374151;
+      border-color: #9ca3af;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    }
+
+    .dark .save-option-btn .text {
+      color: #f9fafb;
+    }
+
+    .dark .save-option-btn .desc {
+      color: #d1d5db;
+    }
+
+    .dark .close-btn {
+      color: #d1d5db;
+    }
+
+    .dark .close-btn:hover {
+      background: #4b5563;
+    }
+
+    @media (max-width: 768px) {
+      .save-content {
+        width: 95%;
+        margin: 20px;
+      }
+
+      .save-options {
+        padding: 16px;
+      }
+
+      .save-option-btn {
+        padding: 16px;
+        gap: 12px;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部工具栏 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a href="index.html" class="logo"><img src="CloudPalette.svg" alt="CloudPalette Logo"> 云彩配色</a>
+      <div class="controls">
+        <div class="control-group">
+          <label>数量:</label>
+          <input type="number" id="colorCount" value="5" min="1" max="11" style="width: 60px;" title="设置颜色数量">
+        </div>
+        <div class="control-group">
+          <label>类型:</label>
+          <select id="paletteType">
+            <option value="random">随机配色</option>
+            <option value="aesthetic-soft">美学随机·协调</option>
+            <option value="aesthetic-contrast">美学随机·对比</option>
+            <option value="analogous">类似色</option>
+            <option value="complementary">互补色</option>
+            <option value="triadic">三角配色</option>
+            <option value="monochromatic">单色配色</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>饱和度:</label>
+          <select id="saturationLevel">
+            <option value="very-low">极低</option>
+            <option value="low">低饱和度</option>
+            <option value="medium">中等</option>
+            <option value="high">高饱和度</option>
+            <option value="very-high">极高</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>对比度:</label>
+          <select id="contrastLevel">
+            <option value="very-low">极低</option>
+            <option value="low">低对比</option>
+            <option value="medium">中等</option>
+            <option value="high">高对比</option>
+            <option value="very-high">极高</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>色彩空间:</label>
+          <select id="colorSpace">
+            <option value="standard">标准色</option>
+            <option value="chinese">中国传统色</option>
+            <option value="morandi">莫兰迪色</option>
+            <option value="japanese">日本传统色</option>
+            <option value="matisse">马蒂斯色系</option>
+            <option value="mondrian">蒙德里安色系</option>
+            <option value="vangogh">梵高色系</option>
+            <option value="picasso">毕加索色系</option>
+            <option value="dunhuang">敦煌色系</option>
+            <option value="rococo">洛可可色系</option>
+            <option value="memphis">孟菲斯色系</option>
+            <option value="macaron">马卡龙色系</option>
+            <option value="cream">奶油色系</option>
+            <option value="monet">莫奈色系</option>
+            <option value="ral">RAL色系</option>
+            <option value="ncs">NCS色系</option>
+            <option value="cyberpunk">赛博朋克色系</option>
+            <option value="pop">波普色系</option>
+          </select>
+        </div>
+        <button class="generate-btn" id="generateBtn">生成配色</button>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <a href="professional.html" class="action-btn" title="专业配色模式">专业</a>
+      <button class="action-btn" id="saveBtn" title="保存配色方案">保存</button>
+      <button class="action-btn" id="toggleThemeBtn" title="切换暗色模式">主题</button>
+    </div>
+  </div>
+
+  <!-- 主配色区域 -->
+  <div class="main-content">
+    <div class="palette-container">
+
+      
+      <div class="palette" id="palette">
+        <!-- 颜色块将在这里动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部信息栏 -->
+  <div class="info-bar">
+    <div class="info-item">
+      <span>类型: <span class="palette-type" id="currentType">随机配色</span></span>
+    </div>
+    <div class="info-item">
+      <span>数量: <strong id="currentCount">5</strong></span>
+    </div>
+    <div class="info-item">
+      <span>生成时间: <strong id="generateTime">-</strong></span>
+    </div>
+    <div class="info-item">
+      <span>快捷键: <strong>空格键</strong> 生成配色</span>
+    </div>
+    <div class="export-buttons">
+      <button class="action-btn" id="historyBtn">历史记录</button>
+      <button class="action-btn" id="clearBtn">清空历史</button>
+    </div>
+  </div>
+
+  <div class="copy-notification" id="copyNotification">
+    颜色代码已复制到剪贴板！
+  </div>
+
+  <!-- 历史记录模态框 -->
+  <div class="history-modal" id="historyModal">
+    <div class="history-content">
+      <div class="history-header">
+        <h3>历史记录</h3>
+        <button class="close-btn" id="historyCloseBtn">×</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <!-- 历史记录将在这里动态生成 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 保存格式选择模态框 -->
+  <div class="save-modal" id="saveModal">
+    <div class="save-content">
+      <div class="save-header">
+        <h3>选择保存格式</h3>
+        <button class="close-btn" id="saveCloseBtn">×</button>
+      </div>
+      <div class="save-options">
+        <button class="save-option-btn" id="saveLocalBtn">
+          <span class="text">保存到本地</span>
+          <span class="desc">保存到浏览器本地存储</span>
+        </button>
+        <button class="save-option-btn" id="saveCSSBtn">
+          <span class="text">导出为CSS</span>
+          <span class="desc">下载CSS文件</span>
+        </button>
+        <button class="save-option-btn" id="saveJSONBtn">
+          <span class="text">导出为JSON</span>
+          <span class="desc">下载JSON文件</span>
+        </button>
+        <button class="save-option-btn" id="saveTXTBtn">
+          <span class="text">导出为TXT</span>
+          <span class="desc">下载文本文件</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let savedPalettes = JSON.parse(localStorage.getItem('savedPalettes') || '[]');
+    let historyPalettes = JSON.parse(localStorage.getItem('historyPalettes') || '[]');
+
+    // 颜色名称映射
+    const colorNames = {
+      '#FF0000': '红色', '#00FF00': '绿色', '#0000FF': '蓝色',
+      '#FFFF00': '黄色', '#FF00FF': '洋红', '#00FFFF': '青色',
+      '#FFA500': '橙色', '#800080': '紫色', '#008000': '深绿',
+      '#000080': '深蓝', '#800000': '深红', '#FFC0CB': '粉色'
+    };
+
+    // 配色类型名称映射
+    const typeNames = {
+      'random': '随机配色',
+      'aesthetic-soft': '美学随机·协调',
+      'aesthetic-contrast': '美学随机·对比',
+      'analogous': '类似色配色',
+      'complementary': '互补色配色',
+      'triadic': '三角配色',
+      'monochromatic': '单色配色'
+    };
+
+    // 饱和度范围配置
+    const saturationRanges = {
+      'very-low': { min: 15, max: 35 },
+      'low': { min: 25, max: 45 },
+      'medium': { min: 45, max: 75 },
+      'high': { min: 70, max: 95 },
+      'very-high': { min: 85, max: 100 }
+    };
+
+    // 明度范围配置（影响对比度）
+    const lightnessRanges = {
+      'very-low': { min: 25, max: 45 },
+      'low': { min: 35, max: 55 },
+      'medium': { min: 30, max: 70 },
+      'high': { min: 20, max: 80 },
+      'very-high': { min: 10, max: 90 }
+    };
+
+    // 配色类型对应的固定颜色数量（只有互补色和三角配色需要固定）
+    const typeColorCounts = {
+      'complementary': 2,
+      'triadic': 3
+    };
+
+    // 配色类型支持的操作配置
+    const typeSupportedOperations = {
+      'random': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'aesthetic-soft': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'aesthetic-contrast': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'analogous': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'complementary': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'triadic': ['lock', 'randomize', 'darken', 'lighten', 'custom'],
+      'monochromatic': ['lock', 'randomize', 'darken', 'lighten', 'custom']
+    };
+
+    // 配色类型色彩空间限制配置（只支持标准色的配色类型）
+    const typeColorSpaceRestrictions = {
+      'complementary': true,  // 互补色配色只支持标准色
+      'triadic': true,        // 三角配色只支持标准色
+      'aesthetic-soft': true, // 美学随机·协调只支持标准色
+      'aesthetic-contrast': true, // 美学随机·对比只支持标准色
+      'analogous': true,      // 类似色配色只支持标准色
+      'random': false,        // 随机配色支持所有色彩空间
+      'monochromatic': true   // 单色配色只支持标准色
+    };
+
+    // 色彩空间设置支持配置
+    const colorSpaceSettingsSupport = {
+      'standard': { saturation: true, contrast: true },      // 标准色支持所有设置
+      'chinese': { saturation: false, contrast: false },     // 中国传统色不支持饱和度和对比度
+      'morandi': { saturation: false, contrast: false },     // 莫兰迪色不支持饱和度和对比度
+      'japanese': { saturation: false, contrast: false },    // 日本传统色不支持饱和度和对比度
+      'matisse': { saturation: false, contrast: false },     // 马蒂斯色系不支持饱和度和对比度
+      'mondrian': { saturation: false, contrast: false },    // 蒙德里安色系不支持饱和度和对比度
+      'vangogh': { saturation: false, contrast: false },     // 梵高色系不支持饱和度和对比度
+      'picasso': { saturation: false, contrast: false },     // 毕加索色系不支持饱和度和对比度
+      'dunhuang': { saturation: true, contrast: true },      // 敦煌色系支持所有设置
+      'rococo': { saturation: false, contrast: false },      // 洛可可色系不支持饱和度和对比度
+      'memphis': { saturation: false, contrast: false },     // 孟菲斯色系不支持饱和度和对比度
+      'macaron': { saturation: false, contrast: false },     // 马卡龙色系不支持饱和度和对比度
+      'cream': { saturation: false, contrast: false },       // 奶油色系不支持饱和度和对比度
+      'monet': { saturation: false, contrast: false },       // 莫奈色系不支持饱和度和对比度
+      'ral': { saturation: false, contrast: false },         // RAL色系不支持饱和度和对比度
+      'ncs': { saturation: false, contrast: false },         // NCS色系不支持饱和度和对比度
+      'cyberpunk': { saturation: false, contrast: false },   // 赛博朋克色系不支持饱和度和对比度
+      'pop': { saturation: false, contrast: false }          // 波普色系不支持饱和度和对比度
+    };
+
+    // 色彩空间配置
+    const colorSpaces = {
+      'chinese': {
+        name: '中国传统色',
+        colors: [
+          '#8B4513', '#CD853F', '#D2691E', '#FF6347', '#FF4500',
+          '#DC143C', '#B22222', '#8B0000', '#FF1493', '#C71585',
+          '#4B0082', '#8A2BE2', '#9370DB', '#4169E1', '#0000CD',
+          '#191970', '#00CED1', '#40E0D0', '#48D1CC', '#20B2AA',
+          '#228B22', '#32CD32', '#90EE90', '#98FB98', '#00FF00',
+          '#ADFF2F', '#FFFF00', '#FFD700', '#FFA500', '#FF8C00'
+        ]
+      },
+      'morandi': {
+        name: '莫兰迪色',
+        colors: [
+          '#E8D5C4', '#D4C4B7', '#C4B5A0', '#B8A898', '#A89B8D',
+          '#9B8E7F', '#8E8171', '#817463', '#746755', '#675A47',
+          '#D4E8E8', '#C4D8D8', '#B4C8C8', '#A4B8B8', '#94A8A8',
+          '#849898', '#748888', '#647878', '#546868', '#445858',
+          '#E8E8D4', '#D8D8C4', '#C8C8B4', '#B8B8A4', '#A8A894',
+          '#989884', '#888874', '#787864', '#686854', '#585844'
+        ]
+      },
+      'japanese': {
+        name: '日本传统色',
+        colors: [
+          '#8B4513', '#A0522D', '#CD853F', '#DEB887', '#F5DEB3',
+          '#FFE4B5', '#FFDAB9', '#FFE4E1', '#FFC0CB', '#FFB6C1',
+          '#DDA0DD', '#D8BFD8', '#E6E6FA', '#F0F8FF', '#F5F5DC',
+          '#FAFAD2', '#FFFFE0', '#FFFACD', '#F0E68C', '#BDB76B',
+          '#F5F5F5', '#DCDCDC', '#C0C0C0', '#A9A9A9', '#808080',
+          '#696969', '#2F4F4F', '#708090', '#778899', '#B0C4DE'
+        ]
+      },
+      'matisse': {
+        name: '马蒂斯色系',
+        colors: [
+          '#FF6B35', '#F7931E', '#FFD23F', '#06FFA5', '#00D4AA',
+          '#FF6B9D', '#C44569', '#F9CA24', '#F0932B', '#EB4D4B',
+          '#6C5CE7', '#A29BFE', '#FD79A8', '#FDCB6E', '#E17055',
+          '#00B894', '#00CEC9', '#74B9FF', '#0984E3', '#6C5CE7',
+          '#A29BFE', '#FD79A8', '#FDCB6E', '#E17055', '#00B894',
+          '#FF8A80', '#FFD180', '#FFFF8D', '#A7FFEB', '#B388FF'
+        ]
+      },
+      'mondrian': {
+        name: '蒙德里安色系',
+        colors: [
+          '#FF0000', '#0000FF', '#FFFF00', '#FFFFFF', '#000000',
+          '#FF6B35', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+          '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+          '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+          '#FAD7A0', '#ABEBC6', '#F9E79F', '#D5A6BD', '#A9CCE3'
+        ]
+      },
+      'vangogh': {
+        name: '梵高色系',
+        colors: [
+          '#FFD700', '#FF8C00', '#FF4500', '#8B4513', '#228B22',
+          '#32CD32', '#00CED1', '#4169E1', '#8A2BE2', '#FF1493',
+          '#DC143C', '#B22222', '#8B0000', '#006400', '#008B8B',
+          '#0000CD', '#4B0082', '#8B008B', '#FF6347', '#FF7F50',
+          '#FFA500', '#FFD700', '#FFFF00', '#ADFF2F', '#7FFF00',
+          '#FF6B35', '#FFB347', '#FFD700', '#32CD32', '#00CED1',
+          '#4169E1', '#8A2BE2', '#FF1493', '#DC143C', '#8B0000'
+        ]
+      },
+      'picasso': {
+        name: '毕加索色系',
+        colors: [
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+          '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+          '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+          '#FAD7A0', '#ABEBC6', '#F9E79F', '#D5A6BD', '#A9CCE3',
+          '#E8F8F5', '#F4F6F6', '#FBFCFC', '#F8F9F9', '#F7F9F9',
+          '#FF8A80', '#FFD180', '#FFFF8D', '#A7FFEB', '#B388FF'
+        ]
+      },
+      'dunhuang': {
+        name: '敦煌色系',
+        colors: [
+          '#8B4513', '#CD853F', '#D2691E', '#FF6347', '#FF4500',
+          '#DC143C', '#B22222', '#8B0000', '#FF1493', '#C71585',
+          '#4B0082', '#8A2BE2', '#9370DB', '#4169E1', '#0000CD',
+          '#191970', '#00CED1', '#40E0D0', '#48D1CC', '#20B2AA',
+          '#228B22', '#32CD32', '#90EE90', '#98FB98', '#00FF00',
+          '#ADFF2F', '#FFFF00', '#FFD700', '#FFA500', '#FF8C00',
+          '#DAA520', '#B8860B', '#CD853F', '#DEB887', '#F5DEB3'
+        ]
+      },
+      'rococo': {
+        name: '洛可可色系',
+        colors: [
+          '#F8F9FA', '#E9ECEF', '#DEE2E6', '#CED4DA', '#ADB5BD',
+          '#6C757D', '#495057', '#343A40', '#212529', '#FFFFFF',
+          '#FFF5EE', '#FDF5E6', '#FAF0E6', '#F5F5DC', '#F0F8FF',
+          '#F0FFFF', '#F5F5F5', '#F8F8FF', '#FFFAFA', '#F0FFF0',
+          '#FFF0F5', '#FFE4E1', '#F0E68C', '#E6E6FA', '#F0F8FF',
+          '#FEFEFE', '#FDFDFD', '#FCFCFC', '#FBFBFB', '#FAFAFA'
+        ]
+      },
+      'memphis': {
+        name: '孟菲斯色系',
+        colors: [
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+          '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+          '#F8C471', '#82E0AA', '#F1948A', '#85C1E9', '#D7BDE2',
+          '#FAD7A0', '#ABEBC6', '#F9E79F', '#D5A6BD', '#A9CCE3',
+          '#E8F8F5', '#F4F6F6', '#FBFCFC', '#F8F9F9', '#F7F9F9'
+        ]
+      },
+      'macaron': {
+        name: '马卡龙色系',
+        colors: [
+          '#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFFFBA', '#FFB3F7',
+          '#F7B3FF', '#B3F7FF', '#F7FFB3', '#FFE4B3', '#B3FFE4',
+          '#E4B3FF', '#FFB3E4', '#B3E4FF', '#E4FFB3', '#FFB3B3',
+          '#B3FFB3', '#B3B3FF', '#FFFFB3', '#FFB3FF', '#B3FFFF',
+          '#FFF2B3', '#B3FFF2', '#F2B3FF', '#FFB3F2', '#F2FFB3'
+        ]
+      },
+      'cream': {
+        name: '奶油色系',
+        colors: [
+          '#FFF8DC', '#FFEFD5', '#FFE4B5', '#FFDAB9', '#FFE4C4',
+          '#F5DEB3', '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F',
+          '#F5F5DC', '#FAFAD2', '#FFFFE0', '#FFFACD', '#F0E68C',
+          '#BDB76B', '#F0F8FF', '#F8F8FF', '#FFFAFA', '#F0FFF0',
+          '#FFF0F5', '#FFE4E1', '#F0E68C', '#E6E6FA', '#F0F8FF'
+        ]
+      },
+      'monet': {
+        name: '莫奈色系',
+        colors: [
+          '#87CEEB', '#98FB98', '#F0E68C', '#FFB6C1', '#DDA0DD',
+          '#B0E0E6', '#F5DEB3', '#FFA07A', '#98D8C8', '#F7DC6F',
+          '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA', '#F1948A',
+          '#85C1E9', '#D7BDE2', '#FAD7A0', '#ABEBC6', '#F9E79F',
+          '#D5A6BD', '#A9CCE3', '#E8F8F5', '#F4F6F6', '#FBFCFC',
+          '#E0F6FF', '#F0F8FF', '#F5F5DC', '#FAFAD2', '#FFFFE0'
+        ]
+      },
+      'ral': {
+        name: 'RAL色系',
+        colors: [
+          '#FF0000', '#FF6600', '#FFCC00', '#FFFF00', '#CCFF00',
+          '#66FF00', '#00FF00', '#00FF66', '#00FFCC', '#00FFFF',
+          '#0066FF', '#0000FF', '#6600FF', '#CC00FF', '#FF00FF',
+          '#FF0066', '#FF0033', '#FF3300', '#FF6600', '#FF9900',
+          '#FFCC00', '#FFFF00', '#CCFF00', '#99FF00', '#66FF00'
+        ]
+      },
+      'ncs': {
+        name: 'NCS色系',
+        colors: [
+          '#FF0000', '#FF4000', '#FF8000', '#FFBF00', '#FFFF00',
+          '#BFFF00', '#80FF00', '#40FF00', '#00FF00', '#00FF40',
+          '#00FF80', '#00FFBF', '#00FFFF', '#00BFFF', '#0080FF',
+          '#0040FF', '#0000FF', '#4000FF', '#8000FF', '#BF00FF',
+          '#FF00FF', '#FF00BF', '#FF0080', '#FF0040', '#FF0000'
+        ]
+      },
+      'cyberpunk': {
+        name: '赛博朋克色系',
+        colors: [
+          // 暗色系 - 赛博朋克的基础色调
+          '#0A0A0A', '#1A1A1A', '#2D2D2D', '#3A3A3A', '#4A4A4A',
+          '#1B1B2F', '#16213E', '#0F3460', '#1A1B4B', '#2C1810',
+          '#1F1F1F', '#2A2A2A', '#333333', '#404040', '#4D4D4D',
+          
+          // 霓虹亮色 - 视觉冲击
+          '#FF006E', '#FF6B35', '#F7931E', '#FFD23F', '#06FFA5',
+          '#00D4AA', '#00B8FF', '#0066FF', '#6C5CE7', '#A29BFE',
+          '#FD79A8', '#FF6B9D', '#C44569', '#F9CA24', '#F0932B',
+          '#EB4D4B', '#FF8A80', '#FFD180', '#FFFF8D', '#A7FFEB',
+          '#B388FF', '#FF00FF', '#00FFFF', '#FFFF00', '#FF0000',
+          '#00FF00', '#0000FF', '#FFA500', '#800080', '#008000',
+          '#FF1493', '#00CED1', '#FFD700', '#FF6347', '#32CD32',
+          '#8A2BE2', '#FF4500', '#00FA9A', '#FF69B4', '#1E90FF',
+          
+          // 金属质感色
+          '#C0C0C0', '#B8B8B8', '#A8A8A8', '#989898', '#888888',
+          '#787878', '#686868', '#585858', '#484848', '#383838'
+        ]
+      },
+      'pop': {
+        name: '波普色系',
+        colors: [
+          // 经典波普色彩 - 鲜艳饱和
+          '#FF0000', '#FF4500', '#FF6347', '#FF7F50', '#FF8C00',
+          '#FFA500', '#FFD700', '#FFFF00', '#ADFF2F', '#7FFF00',
+          '#00FF00', '#32CD32', '#00FA9A', '#00FFFF', '#00CED1',
+          '#00BFFF', '#1E90FF', '#4169E1', '#0000FF', '#8A2BE2',
+          '#9370DB', '#9932CC', '#FF00FF', '#FF1493', '#FF69B4',
+          '#FFB6C1', '#FFC0CB', '#FFE4E1', '#FFF0F5', '#F0F8FF',
+          
+          // 波普艺术标志性色彩
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7',
+          '#DDA0DD', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E9',
+          '#F8C471', '#82E0AA', '#F1948A', '#D7BDE2', '#FAD7A0',
+          '#ABEBC6', '#F9E79F', '#D5A6BD', '#A9CCE3', '#E8F8F5',
+          
+          // 高对比度波普色
+          '#FF1744', '#D50000', '#FF9100', '#FF6D00', '#FFD600',
+          '#FFEA00', '#76FF03', '#64DD17', '#00E676', '#00C853',
+          '#00E5FF', '#00B8D4', '#2979FF', '#2962FF', '#651FFF',
+          '#6200EA', '#AA00FF', '#C51162', '#FF1744', '#D500F9',
+          
+          // 柔和波普色
+          '#FFCDD2', '#F8BBD9', '#E1BEE7', '#C5CAE9', '#BBDEFB',
+          '#C3F3FD', '#B2EBF2', '#B2DFDB', '#C8E6C9', '#DCEDC8',
+          '#F0F4C3', '#FFF9C4', '#FFECB3', '#FFE0B2', '#FFCCBC',
+          '#D7CCC8', '#F5F5F5', '#EEEEEE', '#E0E0E0', '#BDBDBD'
+        ]
+      }
+    };
+
+    function updateColorCount() {
+      const paletteType = document.getElementById('paletteType').value;
+      const colorCountInput = document.getElementById('colorCount');
+      const fixedCount = typeColorCounts[paletteType];
+      
+      if (fixedCount) {
+        // 互补色和三角配色需要固定数量
+        colorCountInput.value = fixedCount;
+        colorCountInput.disabled = true;
+        colorCountInput.title = "此配色类型需要固定数量";
+      } else {
+        // 其他配色类型可以自由设置数量
+        colorCountInput.disabled = false;
+        colorCountInput.title = "设置颜色数量";
+      }
+    }
+
+    function updateSettingsVisibility(colorSpace) {
+      const saturationSelect = document.getElementById('saturationLevel');
+      const contrastSelect = document.getElementById('contrastLevel');
+      const saturationLabel = saturationSelect.previousElementSibling;
+      const contrastLabel = contrastSelect.previousElementSibling;
+      
+      const support = colorSpaceSettingsSupport[colorSpace] || { saturation: true, contrast: true };
+      
+      // 控制饱和度设置器
+      if (support.saturation) {
+        saturationSelect.disabled = false;
+        saturationSelect.title = "设置饱和度";
+        saturationLabel.style.opacity = "1";
+        saturationSelect.parentElement.style.opacity = "1";
+      } else {
+        saturationSelect.disabled = true;
+        saturationSelect.value = "medium"; // 禁用时设置为中等
+        saturationSelect.title = `色彩空间 "${colorSpaces[colorSpace]?.name || colorSpace}" 不支持饱和度设置`;
+        saturationLabel.style.opacity = "0.5";
+        saturationSelect.parentElement.style.opacity = "0.5";
+      }
+      
+      // 控制对比度设置器
+      if (support.contrast) {
+        contrastSelect.disabled = false;
+        contrastSelect.title = "设置对比度";
+        contrastLabel.style.opacity = "1";
+        contrastSelect.parentElement.style.opacity = "1";
+      } else {
+        contrastSelect.disabled = true;
+        contrastSelect.value = "medium"; // 禁用时设置为中等
+        contrastSelect.title = `色彩空间 "${colorSpaces[colorSpace]?.name || colorSpace}" 不支持对比度设置`;
+        contrastLabel.style.opacity = "0.5";
+        contrastSelect.parentElement.style.opacity = "0.5";
+      }
+    }
+
+    function randomColor() {
+      const letters = "0123456789ABCDEF";
+      let color = "#";
+      for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+
+    function hslToHex(h, s, l) {
+      h /= 360;
+      s /= 100;
+      l /= 100;
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h * 6) % 2 - 1));
+      const m = l - c / 2;
+      let r = 0, g = 0, b = 0;
+      if (0 <= h && h < 1/6) {
+        r = c; g = x; b = 0;
+      } else if (1/6 <= h && h < 2/6) {
+        r = x; g = c; b = 0;
+      } else if (2/6 <= h && h < 3/6) {
+        r = 0; g = c; b = x;
+      } else if (3/6 <= h && h < 4/6) {
+        r = 0; g = x; b = c;
+      } else if (4/6 <= h && h < 5/6) {
+        r = x; g = 0; b = c;
+      } else if (5/6 <= h && h < 1) {
+        r = c; g = 0; b = x;
+      }
+      const rHex = Math.round((r + m) * 255).toString(16).padStart(2, '0');
+      const gHex = Math.round((g + m) * 255).toString(16).padStart(2, '0');
+      const bHex = Math.round((b + m) * 255).toString(16).padStart(2, '0');
+      return `#${rHex}${gHex}${bHex}`;
+    }
+
+    // 从十六进制转 RGB
+    function hexToRgb(hex) {
+      const value = hex.replace('#', '');
+      const r = parseInt(value.slice(0, 2), 16);
+      const g = parseInt(value.slice(2, 4), 16);
+      const b = parseInt(value.slice(4, 6), 16);
+      return { r, g, b };
+    }
+
+    // RGB转HSL
+    function rgbToHsl(r, g, b) {
+      r /= 255;
+      g /= 255;
+      b /= 255;
+      
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      
+      if (max === min) {
+        h = s = 0; // 无色相
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      
+      return { h: h * 360, s: s * 100, l: l * 100 };
+    }
+
+    // HSL转RGB
+    function hslToRgb(h, s, l) {
+      h /= 360;
+      s /= 100;
+      l /= 100;
+      
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h * 6) % 2 - 1));
+      const m = l - c / 2;
+      let r = 0, g = 0, b = 0;
+      
+      if (0 <= h && h < 1/6) {
+        r = c; g = x; b = 0;
+      } else if (1/6 <= h && h < 2/6) {
+        r = x; g = c; b = 0;
+      } else if (2/6 <= h && h < 3/6) {
+        r = 0; g = c; b = x;
+      } else if (3/6 <= h && h < 4/6) {
+        r = 0; g = x; b = c;
+      } else if (4/6 <= h && h < 5/6) {
+        r = x; g = 0; b = c;
+      } else if (5/6 <= h && h < 1) {
+        r = c; g = 0; b = x;
+      }
+      
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      };
+    }
+
+    // 颜色偏移函数
+    function applyColorOffset(hexColor, colorSpace) {
+      const { r, g, b } = hexToRgb(hexColor);
+      const hsl = rgbToHsl(r, g, b);
+      
+      // 根据色彩空间调整偏移范围
+      const offsetRanges = getOffsetRanges(colorSpace);
+      
+      // 随机偏移色相、饱和度、明度
+      const hueOffset = (Math.random() - 0.5) * offsetRanges.hue;
+      const saturationOffset = (Math.random() - 0.5) * offsetRanges.saturation;
+      const lightnessOffset = (Math.random() - 0.5) * offsetRanges.lightness;
+      
+      // 应用偏移
+      const newH = (hsl.h + hueOffset + 360) % 360;
+      const newS = Math.max(0, Math.min(100, hsl.s + saturationOffset));
+      const newL = Math.max(0, Math.min(100, hsl.l + lightnessOffset));
+      
+      // 转换回RGB
+      const newRgb = hslToRgb(newH, newS, newL);
+      
+      // 转换为十六进制
+      const newHex = `#${newRgb.r.toString(16).padStart(2, '0')}${newRgb.g.toString(16).padStart(2, '0')}${newRgb.b.toString(16).padStart(2, '0')}`.toUpperCase();
+      
+      return newHex;
+    }
+
+    // 获取不同色彩空间的偏移范围
+    function getOffsetRanges(colorSpace) {
+      const baseRanges = {
+        hue: 30,        // 基础色相偏移范围
+        saturation: 20, // 基础饱和度偏移范围
+        lightness: 15   // 基础明度偏移范围
+      };
+      
+      // 根据色彩空间特性调整偏移范围
+      const spaceAdjustments = {
+        'chinese': { hue: 0.5, saturation: 0.3, lightness: 0.4 },      // 中国传统色：保守偏移
+        'japanese': { hue: 0.4, saturation: 0.3, lightness: 0.4 },     // 日本传统色：保守偏移
+        'morandi': { hue: 0.3, saturation: 0.2, lightness: 0.3 },      // 莫兰迪色：最小偏移
+        'cream': { hue: 0.4, saturation: 0.2, lightness: 0.5 },        // 奶油色：明度偏移较大
+        'macaron': { hue: 0.6, saturation: 0.4, lightness: 0.5 },      // 马卡龙色：中等偏移
+        'monet': { hue: 0.7, saturation: 0.5, lightness: 0.6 },        // 莫奈色：较大偏移
+        'vangogh': { hue: 0.8, saturation: 0.6, lightness: 0.7 },      // 梵高色：大偏移
+        'picasso': { hue: 0.9, saturation: 0.7, lightness: 0.8 },      // 毕加索色：大偏移
+        'matisse': { hue: 0.8, saturation: 0.6, lightness: 0.7 },      // 马蒂斯色：大偏移
+        'mondrian': { hue: 0.5, saturation: 0.4, lightness: 0.5 },     // 蒙德里安色：中等偏移
+        'dunhuang': { hue: 0.6, saturation: 0.5, lightness: 0.6 },     // 敦煌色：中等偏移
+        'rococo': { hue: 0.3, saturation: 0.2, lightness: 0.4 },       // 洛可可色：保守偏移
+        'memphis': { hue: 0.8, saturation: 0.6, lightness: 0.7 },      // 孟菲斯色：大偏移
+        'ral': { hue: 0.4, saturation: 0.3, lightness: 0.4 },          // RAL色：保守偏移
+        'ncs': { hue: 0.4, saturation: 0.3, lightness: 0.4 },          // NCS色：保守偏移
+        'cyberpunk': { hue: 0.6, saturation: 0.5, lightness: 0.8 },    // 赛博朋克：大偏移
+        'pop': { hue: 0.7, saturation: 0.6, lightness: 0.7 }           // 波普色：大偏移
+      };
+      
+      const adjustment = spaceAdjustments[colorSpace] || { hue: 1, saturation: 1, lightness: 1 };
+      
+      return {
+        hue: baseRanges.hue * adjustment.hue,
+        saturation: baseRanges.saturation * adjustment.saturation,
+        lightness: baseRanges.lightness * adjustment.lightness
+      };
+    }
+
+    // 计算相对亮度 (WCAG)
+    function getRelativeLuminance(hex) {
+      const { r, g, b } = hexToRgb(hex);
+      const srgb = [r, g, b].map(v => v / 255);
+      const [R, G, B] = srgb.map(c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+      return 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    }
+
+    // 根据背景色选择可读的文字颜色
+    function getTextColorForBackground(hex) {
+      const L = getRelativeLuminance(hex);
+      return L > 0.6 ? '#000000' : '#FFFFFF';
+    }
+
+    function generateHarmoniousPalette(type, count) {
+      const baseHue = Math.random() * 360;
+      const colors = [];
+      
+      // 获取用户选择的饱和度和对比度设置
+      const saturationLevel = document.getElementById('saturationLevel').value;
+      const contrastLevel = document.getElementById('contrastLevel').value;
+      
+      const satRange = saturationRanges[saturationLevel];
+      const lightRange = lightnessRanges[contrastLevel];
+      
+      // 根据设置生成随机值
+      const randS = () => satRange.min + Math.random() * (satRange.max - satRange.min);
+      const randL = () => lightRange.min + Math.random() * (lightRange.max - lightRange.min);
+      const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+      
+      // 颜色去重函数
+      const addUniqueColor = (color) => {
+        if (!colors.includes(color)) {
+          colors.push(color);
+          return true;
+        }
+        return false;
+      };
+      
+      // 生成唯一颜色的辅助函数
+      const generateUniqueColor = (generator) => {
+        let attempts = 0;
+        const maxAttempts = 50;
+        let color;
+        
+        do {
+          color = generator();
+          attempts++;
+          if (attempts > maxAttempts) {
+            // 如果尝试次数过多，生成一个微调的颜色
+            const lastColor = colors[colors.length - 1] || '#FF0000';
+            const { r, g, b } = hexToRgb(lastColor);
+            const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+            const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+            const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+            color = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+            break;
+          }
+        } while (colors.includes(color));
+        
+        return color;
+      };
+      
+      switch (type) {
+        case 'analogous': {
+          // 优化类似色配色：更自然的色相分布和明度变化
+          const step = 15 + Math.random() * 8; // 15-23°，更自然的间隔
+          const start = -Math.floor(count / 2);
+          
+          // 生成基础色相序列
+          const hues = [];
+          for (let i = 0; i < count; i++) {
+            const hue = (baseHue + (start + i) * step + 360) % 360;
+            hues.push(hue);
+          }
+          
+          // 为每个色相生成不同明度的颜色，创造层次感
+          const baseLightness = 45 + Math.random() * 20; // 基础明度45-65
+          const lightnessVariation = 8 + Math.random() * 12; // 明度变化8-20
+          
+          for (let i = 0; i < count; i++) {
+            const hue = hues[i];
+            const s = randS();
+            
+            // 创造明度层次：中间色较亮，两端色较暗
+            const lightnessOffset = (i - (count - 1) / 2) * (lightnessVariation / (count - 1));
+            const l = clamp(baseLightness + lightnessOffset, lightRange.min, lightRange.max);
+            
+            const color = hslToHex(hue, s, l);
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，调整色相和明度
+              const adjustedHue = (hue + 12) % 360;
+              const adjustedL = clamp(l + (Math.random() * 10 - 5), lightRange.min, lightRange.max);
+              const adjustedColor = hslToHex(adjustedHue, s, adjustedL);
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        case 'complementary': {
+          // 两个互补色，提供明暗变化
+          const hues = [baseHue, (baseHue + 180) % 360];
+          const lightnesses = [clamp(50 + Math.random() * 10, 48, 62), clamp(40 + Math.random() * 8, 38, 52)];
+          for (let i = 0; i < count; i++) {
+            const hue = hues[i % 2];
+            const s = randS();
+            const l = lightnesses[i % 2];
+            const color = hslToHex(hue, s, l);
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，调整明度
+              const adjustedL = clamp(l + (Math.random() * 10 - 5), 30, 70);
+              const adjustedColor = hslToHex(hue, s, adjustedL);
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        case 'triadic': {
+          // 120° 间隔，并加入轻微的亮度差异
+          const hues = [baseHue, (baseHue + 120) % 360, (baseHue + 240) % 360];
+          const ls = [50, 56, 44].map(v => clamp(v + (Math.random() * 6 - 3), 38, 62));
+          for (let i = 0; i < count; i++) {
+            const hue = hues[i % 3];
+            const s = randS();
+            const l = ls[i % 3];
+            const color = hslToHex(hue, s, l);
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，调整饱和度
+              const adjustedS = clamp(s + (Math.random() * 10 - 5), 20, 90);
+              const adjustedColor = hslToHex(hue, adjustedS, l);
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        case 'monochromatic': {
+          // 同一色相，不同明度和轻微饱和度变化
+          const sBase = satRange.min + Math.random() * (satRange.max - satRange.min);
+          const lStart = lightRange.min + Math.random() * 5;
+          const lStep = (lightRange.max - lStart) / Math.max(count - 1, 1);
+          for (let i = 0; i < count; i++) {
+            const l = clamp(lStart + i * lStep, lightRange.min, lightRange.max);
+            const s = clamp(sBase + (Math.random() * 8 - 4), satRange.min, satRange.max);
+            const color = hslToHex(baseHue, s, l);
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，调整明度
+              const adjustedL = clamp(l + (Math.random() * 15 - 7.5), lightRange.min, lightRange.max);
+              const adjustedColor = hslToHex(baseHue, s, adjustedL);
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        case 'aesthetic-soft': {
+          // 从一个随机基色出发，组合多种和谐关系与中性色，形成美学随机
+          const hueCandidates = [];
+          const pushHue = (h) => hueCandidates.push((h + 360) % 360);
+          // 基色
+          pushHue(baseHue);
+          // 互补
+          pushHue(baseHue + 180);
+          // 三角
+          pushHue(baseHue + 120);
+          pushHue(baseHue + 240);
+          // 分裂互补（在互补两侧 ±30°）
+          pushHue(baseHue + 180 - 25);
+          pushHue(baseHue + 180 + 25);
+          // 四分配色（+90°）
+          pushHue(baseHue + 90);
+          pushHue(baseHue - 90);
+          // 邻近强调
+          pushHue(baseHue + 20);
+          pushHue(baseHue - 20);
+          
+          // 生成颜色池：为不同角色设置略微不同的明度/饱和度
+          const pool = [];
+          hueCandidates.forEach((h, idx) => {
+            // 主色更饱和，强调色略高亮或更暗
+            let s = randS();
+            let l = randL();
+            if (idx === 0) {
+              s = clamp(s + 8, satRange.min, Math.min(100, satRange.max + 5));
+              l = clamp(l, lightRange.min, lightRange.max);
+            } else if (idx % 2 === 0) {
+              l = clamp(l + 6, lightRange.min, lightRange.max);
+            } else {
+              l = clamp(l - 6, lightRange.min, lightRange.max);
+            }
+            pool.push(hslToHex(h, s, l));
+          });
+          // 添加中性色（更柔和）
+          const neutralS1 = Math.max(6, Math.min(16, satRange.min));
+          const neutralS2 = Math.max(4, Math.min(12, satRange.min));
+          pool.push(hslToHex(baseHue, neutralS1, clamp((lightRange.min + lightRange.max) / 2 + 12, lightRange.min, lightRange.max)));
+          pool.push(hslToHex(baseHue, neutralS2, clamp((lightRange.min + lightRange.max) / 2 - 8, lightRange.min, lightRange.max)));
+          
+          // 去重并避免过近色（色相距离小于20°）
+          const unique = [];
+          const seen = new Set();
+          const hueOf = (hex) => Math.floor(((Math.random() * 360) + baseHue) % 360);
+          pool.forEach(c => {
+            if (seen.has(c)) return;
+            const h = hueOf(c);
+            const tooClose = unique.some(u => Math.abs(h - hueOf(u)) < 18 || Math.abs(h - hueOf(u)) > 342);
+            if (!tooClose) {
+              unique.push(c);
+              seen.add(c);
+            }
+          });
+          const shuffled = unique.sort(() => Math.random() - 0.5);
+          for (let i = 0; i < count; i++) {
+            const color = shuffled[i % shuffled.length];
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，生成一个微调的颜色
+              const { r, g, b } = hexToRgb(color);
+              const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+              const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+              const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+              const adjustedColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        case 'aesthetic-contrast': {
+          // 更强对比：大角度分布 + 互补/三角/四分 + 极性明度
+          const hues = [
+            baseHue,
+            baseHue + 180,
+            baseHue + 120,
+            baseHue + 240,
+            baseHue + 90,
+            baseHue - 90,
+            baseHue + 180 - 35,
+            baseHue + 180 + 35
+          ].map(h => (h + 360) % 360);
+
+          const pool = [];
+          hues.forEach((h, idx) => {
+            // 对比风格：更高饱和 + 两端明度
+            let s = clamp(randS() + 10, satRange.min, Math.min(100, satRange.max + 10));
+            let l = idx % 2 === 0
+              ? clamp(lightRange.min + 5, lightRange.min, lightRange.max)
+              : clamp(lightRange.max - 5, lightRange.min, lightRange.max);
+            pool.push(hslToHex(h, s, l));
+          });
+          // 添加一个低饱和高明度与一个低饱和低明度中和
+          const neutralHi = hslToHex(baseHue, Math.max(5, satRange.min - 5), clamp(lightRange.max - 2, lightRange.min, lightRange.max));
+          const neutralLo = hslToHex(baseHue, Math.max(5, satRange.min - 5), clamp(lightRange.min + 2, lightRange.min, lightRange.max));
+          pool.push(neutralHi, neutralLo);
+
+          const unique = Array.from(new Set(pool));
+          const shuffled = unique.sort(() => Math.random() - 0.5);
+          for (let i = 0; i < count; i++) {
+            const color = shuffled[i % shuffled.length];
+            if (!addUniqueColor(color)) {
+              // 如果颜色重复，生成一个微调的颜色
+              const { r, g, b } = hexToRgb(color);
+              const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+              const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+              const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+              const adjustedColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+              addUniqueColor(adjustedColor);
+            }
+          }
+          break;
+        }
+        default: {
+          // 根据色彩空间生成配色
+          const colorSpace = document.getElementById('colorSpace').value;
+          
+          if (colorSpace === 'standard') {
+            // 真正的随机配色：更接近Coolors的随机性
+            const selectedHues = [];
+            
+            for (let i = 0; i < count; i++) {
+              let hue;
+              let attempts = 0;
+              const maxAttempts = 20;
+              
+              do {
+                // 完全随机色相，但避免过于接近的颜色
+                hue = Math.random() * 360;
+                attempts++;
+                
+                // 检查与已有颜色的距离
+                const tooClose = selectedHues.some(existingHue => {
+                  const distance = Math.abs(hue - existingHue);
+                  return distance < 25 && distance > 335; // 25度内或几乎互补
+                });
+                
+                // 如果尝试次数过多，放宽限制
+                if (attempts > maxAttempts / 2) {
+                  const tooClose = selectedHues.some(existingHue => {
+                    const distance = Math.abs(hue - existingHue);
+                    return distance < 15 && distance > 345; // 更宽松的限制
+                  });
+                  if (!tooClose) break;
+                } else if (!tooClose) {
+                  break;
+                }
+              } while (attempts < maxAttempts);
+              
+              selectedHues.push(hue);
+              
+              // 随机但和谐的饱和度和明度
+              const s = randS();
+              const l = randL();
+              const color = hslToHex(hue, s, l);
+              if (!addUniqueColor(color)) {
+                // 如果颜色重复，调整色相
+                const adjustedHue = (hue + 30) % 360;
+                const adjustedColor = hslToHex(adjustedHue, s, l);
+                addUniqueColor(adjustedColor);
+              }
+            }
+          } else {
+            // 使用特定色彩空间的颜色
+            const spaceColors = colorSpaces[colorSpace].colors;
+            
+            if (colorSpace === 'cyberpunk') {
+              // 赛博朋克特殊配色逻辑：确保暗色与亮色的视觉冲击
+              const darkColors = spaceColors.filter(color => {
+                const { r, g, b } = hexToRgb(color);
+                const brightness = (r + g + b) / 3;
+                return brightness < 80; // 暗色阈值
+              });
+              
+              const brightColors = spaceColors.filter(color => {
+                const { r, g, b } = hexToRgb(color);
+                const brightness = (r + g + b) / 3;
+                return brightness > 150; // 亮色阈值
+              });
+              
+              const midColors = spaceColors.filter(color => {
+                const { r, g, b } = hexToRgb(color);
+                const brightness = (r + g + b) / 3;
+                return brightness >= 80 && brightness <= 150; // 中色阈值
+              });
+              
+              // 按比例分配颜色类型，确保视觉冲击
+              const darkCount = Math.max(1, Math.floor(count * 0.4)); // 40%暗色
+              const brightCount = Math.max(1, Math.floor(count * 0.4)); // 40%亮色
+              const midCount = count - darkCount - brightCount; // 剩余中色
+              
+              // 从各类颜色中随机选择
+              const selectedColors = [];
+              
+              // 添加暗色
+              const shuffledDark = [...darkColors].sort(() => Math.random() - 0.5);
+              for (let i = 0; i < darkCount && i < shuffledDark.length; i++) {
+                selectedColors.push(shuffledDark[i]);
+              }
+              
+              // 添加亮色
+              const shuffledBright = [...brightColors].sort(() => Math.random() - 0.5);
+              for (let i = 0; i < brightCount && i < shuffledBright.length; i++) {
+                selectedColors.push(shuffledBright[i]);
+              }
+              
+              // 添加中色
+              const shuffledMid = [...midColors].sort(() => Math.random() - 0.5);
+              for (let i = 0; i < midCount && i < shuffledMid.length; i++) {
+                selectedColors.push(shuffledMid[i]);
+              }
+              
+              // 随机打乱顺序，但保持暗色与亮色的对比
+              const finalColors = selectedColors.sort(() => Math.random() - 0.5);
+              
+              for (let i = 0; i < count; i++) {
+                const color = finalColors[i % finalColors.length];
+                
+                // 对颜色进行随机偏移，丰富色彩变化
+                const offsetColor = applyColorOffset(color, colorSpace);
+                
+                if (!addUniqueColor(offsetColor)) {
+                  // 如果颜色重复，从对应亮度类别中选择替代色
+                  const { r, g, b } = hexToRgb(offsetColor);
+                  const brightness = (r + g + b) / 3;
+                  let alternativeColors;
+                  
+                  if (brightness < 80) {
+                    alternativeColors = darkColors;
+                  } else if (brightness > 150) {
+                    alternativeColors = brightColors;
+                  } else {
+                    alternativeColors = midColors;
+                  }
+                  
+                  const alternative = alternativeColors.find(c => !colors.includes(c));
+                  if (alternative) {
+                    const alternativeOffset = applyColorOffset(alternative, colorSpace);
+                    addUniqueColor(alternativeOffset);
+                  } else {
+                    // 如果没有替代色，生成微调颜色
+                    const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+                    const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+                    const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+                    const adjustedColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+                    addUniqueColor(adjustedColor);
+                  }
+                }
+              }
+            } else if (colorSpace === 'pop') {
+              // 波普色系特殊配色逻辑：确保鲜艳色彩与柔和色彩的平衡
+              const vibrantColors = spaceColors.filter(color => {
+                const { r, g, b } = hexToRgb(color);
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const saturation = max === 0 ? 0 : (max - min) / max;
+                return saturation > 0.6 && max > 150; // 高饱和度且较亮的颜色
+              });
+              
+              const softColors = spaceColors.filter(color => {
+                const { r, g, b } = hexToRgb(color);
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                const saturation = max === 0 ? 0 : (max - min) / max;
+                return saturation < 0.4 || max < 150; // 低饱和度或较暗的颜色
+              });
+              
+              // 波普艺术特色：70%鲜艳色彩，30%柔和色彩
+              const vibrantCount = Math.max(1, Math.floor(count * 0.7)); // 70%鲜艳色
+              const softCount = count - vibrantCount; // 30%柔和色
+              
+              // 从各类颜色中随机选择
+              const selectedColors = [];
+              
+              // 添加鲜艳色彩
+              const shuffledVibrant = [...vibrantColors].sort(() => Math.random() - 0.5);
+              for (let i = 0; i < vibrantCount && i < shuffledVibrant.length; i++) {
+                selectedColors.push(shuffledVibrant[i]);
+              }
+              
+              // 添加柔和色彩
+              const shuffledSoft = [...softColors].sort(() => Math.random() - 0.5);
+              for (let i = 0; i < softCount && i < shuffledSoft.length; i++) {
+                selectedColors.push(shuffledSoft[i]);
+              }
+              
+              // 随机打乱顺序，创造波普艺术的活力感
+              const finalColors = selectedColors.sort(() => Math.random() - 0.5);
+              
+              for (let i = 0; i < count; i++) {
+                const color = finalColors[i % finalColors.length];
+                
+                // 对颜色进行随机偏移，丰富色彩变化
+                const offsetColor = applyColorOffset(color, colorSpace);
+                
+                if (!addUniqueColor(offsetColor)) {
+                  // 如果颜色重复，从对应类别中选择替代色
+                  const { r, g, b } = hexToRgb(offsetColor);
+                  const max = Math.max(r, g, b);
+                  const min = Math.min(r, g, b);
+                  const saturation = max === 0 ? 0 : (max - min) / max;
+                  let alternativeColors;
+                  
+                  if (saturation > 0.6 && max > 150) {
+                    alternativeColors = vibrantColors;
+                  } else {
+                    alternativeColors = softColors;
+                  }
+                  
+                  const alternative = alternativeColors.find(c => !colors.includes(c));
+                  if (alternative) {
+                    const alternativeOffset = applyColorOffset(alternative, colorSpace);
+                    addUniqueColor(alternativeOffset);
+                  } else {
+                    // 如果没有替代色，生成微调颜色
+                    const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+                    const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+                    const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+                    const adjustedColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+                    addUniqueColor(adjustedColor);
+                  }
+                }
+              }
+            } else {
+              // 其他色彩空间的原有逻辑，增加随机偏移
+              const shuffled = [...spaceColors].sort(() => Math.random() - 0.5);
+              
+              for (let i = 0; i < count; i++) {
+                const color = shuffled[i % shuffled.length];
+                
+                // 对颜色进行随机偏移，丰富色彩变化
+                const offsetColor = applyColorOffset(color, colorSpace);
+                
+                if (!addUniqueColor(offsetColor)) {
+                  // 如果颜色重复，生成一个微调的颜色
+                  const { r, g, b } = hexToRgb(offsetColor);
+                  const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 20) - 10));
+                  const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 20) - 10));
+                  const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 20) - 10));
+                  const adjustedColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+                  addUniqueColor(adjustedColor);
+                }
+              }
+            }
+          }
+        }
+      }
+      return colors;
+    }
+
+    function getColorName(color) {
+      return colorNames[color.toUpperCase()] || '自定义色';
+    }
+
+    function showCopyNotification() {
+      const notification = document.getElementById('copyNotification');
+      notification.classList.add('show');
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 2000);
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showCopyNotification();
+      }).catch(() => {
+        // 降级方案
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showCopyNotification();
+      });
+    }
+
+    // 主题切换（白天/暗色）
+    function toggleTheme() {
+      console.log('toggleTheme function called');
+      const isDark = document.body.classList.toggle('dark');
+      console.log('Theme toggled, isDark:', isDark);
+      const btn = document.getElementById('toggleThemeBtn');
+      if (btn) {
+        btn.textContent = isDark ? '亮色' : '暗色';
+        btn.title = isDark ? '切换到亮色模式' : '切换到暗色模式';
+        console.log('Button text updated to:', btn.textContent);
+      } else {
+        console.error('Toggle theme button not found');
+      }
+      // 保存偏好
+      localStorage.setItem('preferredTheme', isDark ? 'dark' : 'light');
+    }
+
+
+    // 颜色操作函数
+    let currentColors = [];
+    let lockedColors = new Set();
+
+    function lockColor(index) {
+      console.log('lockColor called with index:', index);
+      const currentType = document.getElementById('paletteType').value;
+      if (!typeSupportedOperations[currentType]?.includes('lock')) {
+        return;
+      }
+      
+      if (lockedColors.has(index)) {
+        lockedColors.delete(index);
+        console.log('Unlocked color at index:', index);
+      } else {
+        lockedColors.add(index);
+        console.log('Locked color at index:', index, 'Color:', currentColors[index]);
+      }
+      updateColorActions();
+    }
+
+    function randomizeColor(index) {
+      console.log('randomizeColor called with index:', index);
+      const currentType = document.getElementById('paletteType').value;
+      if (!typeSupportedOperations[currentType]?.includes('randomize') || lockedColors.has(index)) {
+        return;
+      }
+      
+      const colorSpace = document.getElementById('colorSpace').value;
+      let newColor;
+      let attempts = 0;
+      const maxAttempts = 50;
+      
+      do {
+        if (colorSpace === 'standard') {
+          newColor = generateRandomColor();
+        } else {
+          const spaceColors = colorSpaces[colorSpace].colors;
+          newColor = spaceColors[Math.floor(Math.random() * spaceColors.length)];
+        }
+        attempts++;
+        
+        if (attempts > maxAttempts) {
+          // 如果尝试次数过多，生成一个微调的颜色
+          const existingColor = currentColors.find((_, i) => i !== index) || '#FF0000';
+          const { r, g, b } = hexToRgb(existingColor);
+          const newR = Math.max(0, Math.min(255, r + Math.floor(Math.random() * 30) - 15));
+          const newG = Math.max(0, Math.min(255, g + Math.floor(Math.random() * 30) - 15));
+          const newB = Math.max(0, Math.min(255, b + Math.floor(Math.random() * 30) - 15));
+          newColor = `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+          break;
+        }
+      } while (currentColors.includes(newColor));
+      
+      currentColors[index] = newColor;
+      updatePaletteDisplay();
+    }
+
+    function darkenColor(index) {
+      console.log('darkenColor called with index:', index);
+      const currentType = document.getElementById('paletteType').value;
+      if (!typeSupportedOperations[currentType]?.includes('darken') || lockedColors.has(index)) {
+        return;
+      }
+      
+      const color = currentColors[index];
+      const newColor = adjustColorBrightness(color, -20);
+      currentColors[index] = newColor;
+      updatePaletteDisplay();
+    }
+
+    function lightenColor(index) {
+      console.log('lightenColor called with index:', index);
+      const currentType = document.getElementById('paletteType').value;
+      if (!typeSupportedOperations[currentType]?.includes('lighten') || lockedColors.has(index)) {
+        return;
+      }
+      
+      const color = currentColors[index];
+      const newColor = adjustColorBrightness(color, 20);
+      currentColors[index] = newColor;
+      updatePaletteDisplay();
+    }
+
+    function customColor(index) {
+      console.log('customColor called with index:', index);
+      const currentType = document.getElementById('paletteType').value;
+      if (!typeSupportedOperations[currentType]?.includes('custom') || lockedColors.has(index)) {
+        return;
+      }
+      
+      const color = prompt('请输入颜色代码（如 #FF0000）：', currentColors[index]);
+      if (color && /^#[0-9A-F]{6}$/i.test(color)) {
+        currentColors[index] = color.toUpperCase();
+        updatePaletteDisplay();
+      } else if (color) {
+        alert('请输入有效的颜色代码！格式如：#FF0000');
+      }
+    }
+
+    function generateRandomColor() {
+      const saturationLevel = document.getElementById('saturationLevel').value;
+      const contrastLevel = document.getElementById('contrastLevel').value;
+      
+      const satRange = saturationRanges[saturationLevel];
+      const lightRange = lightnessRanges[contrastLevel];
+      
+      const hue = Math.random() * 360;
+      const s = satRange.min + Math.random() * (satRange.max - satRange.min);
+      const l = lightRange.min + Math.random() * (lightRange.max - lightRange.min);
+      
+      return hslToHex(hue, s, l);
+    }
+
+    function adjustColorBrightness(hex, amount) {
+      const { r, g, b } = hexToRgb(hex);
+      const newR = Math.max(0, Math.min(255, r + amount));
+      const newG = Math.max(0, Math.min(255, g + amount));
+      const newB = Math.max(0, Math.min(255, b + amount));
+      
+      return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`.toUpperCase();
+    }
+
+    function updateColorActions() {
+      const boxes = document.querySelectorAll('.color-box');
+      const currentType = document.getElementById('paletteType').value;
+      const supportedOps = typeSupportedOperations[currentType] || [];
+      
+      boxes.forEach((box, index) => {
+        const actionBtns = box.querySelectorAll('.color-action-btn');
+        actionBtns.forEach((btn, btnIndex) => {
+          const operations = ['lock', 'randomize', 'darken', 'lighten', 'custom'];
+          const operation = operations[btnIndex];
+          
+          if (operation === 'lock') {
+            const icon = btn.querySelector('.icon');
+            const text = btn.querySelector('.text');
+            const isLocked = lockedColors.has(index);
+            
+            if (text) text.textContent = isLocked ? '解锁' : '锁定';
+            btn.title = isLocked ? '解锁颜色' : '锁定颜色';
+          }
+          
+          // 检查操作是否被支持
+          const isSupported = supportedOps.includes(operation);
+          btn.disabled = !isSupported;
+          
+          if (!isSupported) {
+            btn.title = '此配色模式不支持此操作';
+          }
+        });
+        
+        // 动态调整按钮容器高度
+        const colorActions = box.querySelector('.color-actions');
+        if (colorActions) {
+          adjustColorActionsHeight(box, colorActions);
+        }
+      });
+    }
+
+    // 动态调整按钮容器高度的函数
+    function adjustColorActionsHeight(colorBox, colorActions) {
+      // 获取色块的实际高度
+      const boxHeight = colorBox.offsetHeight;
+      const boxWidth = colorBox.offsetWidth;
+      
+      // 计算按钮容器的最大可用高度
+      const maxHeight = Math.max(120, boxHeight - 16); // 最小高度120px，减去上下边距
+      
+      // 设置按钮容器的最大高度
+      colorActions.style.maxHeight = `${maxHeight}px`;
+      
+      // 根据色块高度动态调整按钮大小
+      let scale = 1;
+      if (boxHeight < 200) {
+        scale = Math.max(0.6, boxHeight / 260); // 260是默认色块高度，最小缩放0.6
+      } else if (boxHeight > 300) {
+        scale = Math.min(1.2, boxHeight / 260); // 最大缩放1.2
+      }
+      
+      // 应用缩放变换
+      colorActions.style.transform = `translateY(-5px) scale(${scale * 0.95}) translateZ(1px)`;
+      
+      // 调整按钮大小
+      const buttons = colorActions.querySelectorAll('.color-action-btn');
+      const baseSize = 30;
+      const scaledSize = Math.max(18, Math.min(40, baseSize * scale));
+      
+      buttons.forEach(btn => {
+        btn.style.width = `${scaledSize}px`;
+        btn.style.height = `${scaledSize}px`;
+        btn.style.padding = `${Math.max(2, 6 * scale)}px ${Math.max(1, 4 * scale)}px`;
+      });
+      
+      // 调整按钮容器宽度
+      const containerWidth = Math.max(36, scaledSize + 12);
+      colorActions.style.width = `${containerWidth}px`;
+    }
+
+    function updatePaletteDisplay() {
+      const palette = document.getElementById("palette");
+      palette.innerHTML = "";
+      
+      currentColors.forEach((color, index) => {
+        const box = document.createElement("div");
+        box.className = "color-box";
+        box.style.background = color;
+        const textColor = getTextColorForBackground(color);
+        box.style.color = textColor;
+        
+        const colorCode = document.createElement("div");
+        colorCode.className = "color-code";
+        colorCode.textContent = color;
+        
+        const colorActions = document.createElement("div");
+        colorActions.className = "color-actions";
+        colorActions.innerHTML = `
+          <button class="color-action-btn" data-index="${index}" data-action="lock" title="${lockedColors.has(index) ? '解锁颜色' : '锁定颜色'}">
+            <span class="text">${lockedColors.has(index) ? '解锁' : '锁定'}</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="randomize" title="随机此颜色">
+            <span class="text">随机</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="darken" title="变深">
+            <span class="text">变深</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="lighten" title="变浅">
+            <span class="text">变浅</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="custom" title="自定义颜色">
+            <span class="text">自定义</span>
+          </button>
+        `;
+        
+        box.appendChild(colorCode);
+        box.appendChild(colorActions);
+        
+        // 动态调整按钮容器高度
+        adjustColorActionsHeight(box, colorActions);
+        
+        // 使用事件委托处理按钮点击
+        colorActions.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const target = e.target.closest('.color-action-btn');
+          if (!target) return;
+          
+          const index = parseInt(target.getAttribute('data-index'));
+          const action = target.getAttribute('data-action');
+          
+          switch(action) {
+            case 'lock':
+              lockColor(index);
+              break;
+            case 'randomize':
+              randomizeColor(index);
+              break;
+            case 'darken':
+              darkenColor(index);
+              break;
+            case 'lighten':
+              lightenColor(index);
+              break;
+            case 'custom':
+              customColor(index);
+              break;
+          }
+        });
+        
+        box.onclick = () => copyToClipboard(color);
+        palette.appendChild(box);
+      });
+      
+      // 更新按钮状态
+      updateColorActions();
+    }
+
+    function updateInfoBar(colors, type) {
+      document.getElementById('currentCount').textContent = colors.length;
+      document.getElementById('currentType').textContent = typeNames[type];
+      document.getElementById('generateTime').textContent = new Date().toLocaleTimeString();
+    }
+
+    function generatePalette() {
+      const palette = document.getElementById("palette");
+      const paletteType = document.getElementById("paletteType").value;
+      
+      // 检查配色类型是否需要强制使用标准色
+      if (typeColorSpaceRestrictions[paletteType]) {
+        const colorSpaceSelect = document.getElementById('colorSpace');
+        if (colorSpaceSelect.value !== 'standard') {
+          colorSpaceSelect.value = 'standard';
+          console.log(`配色类型 "${typeNames[paletteType]}" 只支持标准色，已自动切换色彩空间`);
+        }
+        // 禁用色彩空间选择器
+        colorSpaceSelect.disabled = true;
+        colorSpaceSelect.title = `配色类型 "${typeNames[paletteType]}" 只支持标准色`;
+      } else {
+        // 启用色彩空间选择器
+        const colorSpaceSelect = document.getElementById('colorSpace');
+        colorSpaceSelect.disabled = false;
+        colorSpaceSelect.title = '选择色彩空间';
+      }
+      
+      // 更新设置器可见性
+      const currentColorSpace = document.getElementById('colorSpace').value;
+      updateSettingsVisibility(currentColorSpace);
+      
+      // 根据配色类型决定颜色数量
+      let colorCount;
+      if (typeColorCounts[paletteType]) {
+        // 互补色和三角配色使用固定数量
+        colorCount = typeColorCounts[paletteType];
+      } else {
+        // 其他配色类型使用用户输入的数量
+        colorCount = parseInt(document.getElementById("colorCount").value) || 5;
+      }
+      
+      palette.innerHTML = "";
+      
+      // 保存当前锁定的颜色
+      const lockedColorMap = new Map();
+      lockedColors.forEach(index => {
+        if (currentColors[index]) {
+          lockedColorMap.set(index, currentColors[index]);
+          console.log('Preserving locked color at index:', index, 'Color:', currentColors[index]);
+        }
+      });
+      
+      const colors = generateHarmoniousPalette(paletteType, colorCount);
+      currentColors = [...colors]; // 保存当前颜色数组
+      
+      // 恢复锁定的颜色
+      lockedColorMap.forEach((color, index) => {
+        if (index < currentColors.length) {
+          currentColors[index] = color;
+          console.log('Restored locked color at index:', index, 'Color:', color);
+        }
+      });
+      
+      currentColors.forEach((color, index) => {
+        const box = document.createElement("div");
+        box.className = "color-box";
+        box.style.background = color;
+        // 自动设置文本颜色，保证可读性
+        const textColor = getTextColorForBackground(color);
+        box.style.color = textColor;
+        
+        const colorCode = document.createElement("div");
+        colorCode.className = "color-code";
+        colorCode.textContent = color;
+        
+        const colorActions = document.createElement("div");
+        colorActions.className = "color-actions";
+        colorActions.innerHTML = `
+          <button class="color-action-btn" data-index="${index}" data-action="lock" title="${lockedColors.has(index) ? '解锁颜色' : '锁定颜色'}">
+            <span class="text">${lockedColors.has(index) ? '解锁' : '锁定'}</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="randomize" title="随机此颜色">
+            <span class="text">随机</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="darken" title="变深">
+            <span class="text">变深</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="lighten" title="变浅">
+            <span class="text">变浅</span>
+          </button>
+          <button class="color-action-btn" data-index="${index}" data-action="custom" title="自定义颜色">
+            <span class="text">自定义</span>
+          </button>
+        `;
+        
+        box.appendChild(colorCode);
+        box.appendChild(colorActions);
+        
+        // 动态调整按钮容器高度
+        adjustColorActionsHeight(box, colorActions);
+        
+        // 使用事件委托处理按钮点击
+        colorActions.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const target = e.target.closest('.color-action-btn');
+          if (!target) return;
+          
+          const index = parseInt(target.getAttribute('data-index'));
+          const action = target.getAttribute('data-action');
+          
+          switch(action) {
+            case 'lock':
+              lockColor(index);
+              break;
+            case 'randomize':
+              randomizeColor(index);
+              break;
+            case 'darken':
+              darkenColor(index);
+              break;
+            case 'lighten':
+              lightenColor(index);
+              break;
+            case 'custom':
+              customColor(index);
+              break;
+          }
+        });
+        
+        box.onclick = () => copyToClipboard(color);
+        palette.appendChild(box);
+      });
+
+      // 更新信息栏
+      updateInfoBar(colors, paletteType);
+      
+      // 更新按钮状态
+      updateColorActions();
+      
+      // 添加到历史记录
+      addToHistory(colors, paletteType);
+    }
+
+    function savePalette() {
+      console.log('savePalette function called');
+      const colorBoxes = document.querySelectorAll('.color-box');
+      if (colorBoxes.length === 0) {
+        alert('请先生成配色！');
+        return;
+      }
+      
+      // 显示保存格式选择模态框
+      showSaveModal();
+    }
+
+    function showSaveModal() {
+      document.getElementById('saveModal').style.display = 'block';
+    }
+
+    function closeSaveModal() {
+      document.getElementById('saveModal').style.display = 'none';
+    }
+
+    function saveAsLocal() {
+      const colorBoxes = document.querySelectorAll('.color-box');
+      const colors = Array.from(colorBoxes).map(box => box.style.background);
+      const palette = {
+        id: Date.now(),
+        colors: colors,
+        type: document.getElementById('paletteType').value,
+        timestamp: new Date().toLocaleString()
+      };
+
+      savedPalettes.push(palette);
+      localStorage.setItem('savedPalettes', JSON.stringify(savedPalettes));
+      closeSaveModal();
+      alert('配色已保存到本地！');
+    }
+
+    function saveAsCSS() {
+      const colorBoxes = document.querySelectorAll('.color-box');
+      if (colorBoxes.length === 0) {
+        alert('请先生成配色！');
+        return;
+      }
+
+      let css = '/* 配色方案 CSS */\n';
+      colorBoxes.forEach((box, index) => {
+        const color = box.style.background;
+        css += `.color-${index + 1} {\n  background-color: ${color};\n}\n`;
+      });
+
+      const blob = new Blob([css], { type: 'text/css' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'color-palette.css';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+    }
+
+    function saveAsJSON() {
+      const colorBoxes = document.querySelectorAll('.color-box');
+      if (colorBoxes.length === 0) {
+        alert('请先生成配色！');
+        return;
+      }
+
+      const colors = Array.from(colorBoxes).map(box => box.style.background);
+      const data = {
+        palette: colors,
+        type: document.getElementById('paletteType').value,
+        generatedAt: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'color-palette.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+    }
+
+    function saveAsTXT() {
+      const colorBoxes = document.querySelectorAll('.color-box');
+      if (colorBoxes.length === 0) {
+        alert('请先生成配色！');
+        return;
+      }
+
+      const colors = Array.from(colorBoxes).map(box => box.style.background);
+      const type = document.getElementById('paletteType').value;
+      const timestamp = new Date().toLocaleString();
+      
+      let txt = `配色方案\n`;
+      txt += `生成时间: ${timestamp}\n`;
+      txt += `配色类型: ${type}\n`;
+      txt += `颜色数量: ${colors.length}\n\n`;
+      txt += `颜色列表:\n`;
+      colors.forEach((color, index) => {
+        txt += `${index + 1}. ${color}\n`;
+      });
+
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'color-palette.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+    }
+
+    function clearPalettes() {
+      console.log('clearPalettes function called');
+      if (confirm('确定要清空所有保存的配色和历史记录吗？')) {
+        savedPalettes = [];
+        historyPalettes = [];
+        localStorage.removeItem('savedPalettes');
+        localStorage.removeItem('historyPalettes');
+        alert('已清空所有保存的配色和历史记录！');
+      }
+    }
+
+
+
+    // 页面加载时生成一次配色
+    window.onload = function() {
+      // 初始化颜色数量
+      updateColorCount();
+      
+      // 初始化色彩空间限制状态
+      const paletteType = document.getElementById('paletteType').value;
+      if (typeColorSpaceRestrictions[paletteType]) {
+        const colorSpaceSelect = document.getElementById('colorSpace');
+        colorSpaceSelect.value = 'standard';
+        colorSpaceSelect.disabled = true;
+        colorSpaceSelect.title = `配色类型 "${typeNames[paletteType]}" 只支持标准色`;
+      }
+      
+      // 初始化设置器可见性
+      const currentColorSpace = document.getElementById('colorSpace').value;
+      updateSettingsVisibility(currentColorSpace);
+      
+      generatePalette();
+      console.log('Page loaded, history palettes:', historyPalettes);
+      
+      // 恢复主题偏好
+      const savedTheme = localStorage.getItem('preferredTheme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        const btn = document.getElementById('toggleThemeBtn');
+        if (btn) {
+          btn.textContent = '亮色';
+          btn.title = '切换到亮色模式';
+        }
+      }
+      
+      // 如果没有历史记录，添加一些测试数据
+      if (historyPalettes.length === 0) {
+        const testHistory = {
+          id: Date.now() - 1000,
+          colors: ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF'],
+          type: 'random',
+          timestamp: new Date().toLocaleString()
+        };
+        historyPalettes.push(testHistory);
+        localStorage.setItem('historyPalettes', JSON.stringify(historyPalettes));
+        console.log('Added test history data');
+      }
+
+      // 添加按钮点击事件监听器
+      console.log('Adding button event listeners...');
+      
+
+      
+
+      const saveBtn = document.getElementById('saveBtn');
+      if (saveBtn) {
+        console.log('Save button found');
+        saveBtn.addEventListener('click', savePalette);
+      } else {
+        console.log('Save button not found');
+      }
+
+      const themeBtn = document.getElementById('toggleThemeBtn');
+      if (themeBtn) {
+        console.log('Theme button found');
+        themeBtn.addEventListener('click', toggleTheme);
+      } else {
+        console.log('Theme button not found');
+      }
+
+      // 生成配色按钮
+      const generateBtn = document.getElementById('generateBtn');
+      if (generateBtn) {
+        console.log('Generate button found');
+        generateBtn.addEventListener('click', generatePalette);
+      } else {
+        console.log('Generate button not found');
+      }
+
+      // 底部按钮
+      const historyBtn = document.getElementById('historyBtn');
+      if (historyBtn) {
+        console.log('History button found');
+        historyBtn.addEventListener('click', showHistory);
+      } else {
+        console.log('History button not found');
+      }
+
+      const clearBtn = document.getElementById('clearBtn');
+      if (clearBtn) {
+        console.log('Clear button found');
+        clearBtn.addEventListener('click', clearPalettes);
+      } else {
+        console.log('Clear button not found');
+      }
+
+      // 模态框关闭按钮
+      const historyCloseBtn = document.getElementById('historyCloseBtn');
+      if (historyCloseBtn) {
+        console.log('History close button found');
+        historyCloseBtn.addEventListener('click', closeHistory);
+      } else {
+        console.log('History close button not found');
+      }
+
+      const saveCloseBtn = document.getElementById('saveCloseBtn');
+      if (saveCloseBtn) {
+        console.log('Save close button found');
+        saveCloseBtn.addEventListener('click', closeSaveModal);
+      } else {
+        console.log('Save close button not found');
+      }
+
+      // 保存选项按钮
+      const saveLocalBtn = document.getElementById('saveLocalBtn');
+      if (saveLocalBtn) {
+        console.log('Save local button found');
+        saveLocalBtn.addEventListener('click', saveAsLocal);
+      } else {
+        console.log('Save local button not found');
+      }
+
+      const saveCSSBtn = document.getElementById('saveCSSBtn');
+      if (saveCSSBtn) {
+        console.log('Save CSS button found');
+        saveCSSBtn.addEventListener('click', saveAsCSS);
+      } else {
+        console.log('Save CSS button not found');
+      }
+
+      const saveJSONBtn = document.getElementById('saveJSONBtn');
+      if (saveJSONBtn) {
+        console.log('Save JSON button found');
+        saveJSONBtn.addEventListener('click', saveAsJSON);
+      } else {
+        console.log('Save JSON button not found');
+      }
+
+      const saveTXTBtn = document.getElementById('saveTXTBtn');
+      if (saveTXTBtn) {
+        console.log('Save TXT button found');
+        saveTXTBtn.addEventListener('click', saveAsTXT);
+      } else {
+        console.log('Save TXT button not found');
+      }
+    };
+
+    // 键盘快捷键
+    document.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        generatePalette();
+      }
+    });
+
+    // 监听输入变化
+    document.getElementById('colorCount').addEventListener('change', function() {
+      // 只有在非固定数量的配色类型下才允许数量变化
+      const paletteType = document.getElementById('paletteType').value;
+      if (!typeColorCounts[paletteType]) {
+        generatePalette();
+      }
+    });
+    document.getElementById('paletteType').addEventListener('change', function() {
+      const paletteType = this.value;
+      
+      // 检查是否需要强制设置为标准色
+      if (typeColorSpaceRestrictions[paletteType]) {
+        const colorSpaceSelect = document.getElementById('colorSpace');
+        if (colorSpaceSelect.value !== 'standard') {
+          colorSpaceSelect.value = 'standard';
+          console.log(`配色类型 "${typeNames[paletteType]}" 只支持标准色，已自动切换色彩空间`);
+        }
+        // 禁用色彩空间选择器
+        colorSpaceSelect.disabled = true;
+        colorSpaceSelect.title = `配色类型 "${typeNames[paletteType]}" 只支持标准色`;
+      } else {
+        // 启用色彩空间选择器
+        const colorSpaceSelect = document.getElementById('colorSpace');
+        colorSpaceSelect.disabled = false;
+        colorSpaceSelect.title = '选择色彩空间';
+      }
+      
+      // 更新设置器可见性
+      const currentColorSpace = document.getElementById('colorSpace').value;
+      updateSettingsVisibility(currentColorSpace);
+      
+      updateColorCount();
+      generatePalette();
+      updateColorActions();
+    });
+    document.getElementById('saturationLevel').addEventListener('change', function() {
+      if (!this.disabled) {
+        generatePalette();
+      }
+    });
+    document.getElementById('contrastLevel').addEventListener('change', function() {
+      if (!this.disabled) {
+        generatePalette();
+      }
+    });
+    document.getElementById('colorSpace').addEventListener('change', function() {
+      const paletteType = document.getElementById('paletteType').value;
+      const colorSpace = this.value;
+      
+      // 检查当前配色类型是否只支持标准色
+      if (typeColorSpaceRestrictions[paletteType] && colorSpace !== 'standard') {
+        this.value = 'standard';
+        console.log(`配色类型 "${typeNames[paletteType]}" 只支持标准色，已自动切换回标准色`);
+        return; // 不重新生成配色，因为色彩空间被重置了
+      }
+      
+      // 更新饱和度和对比度设置器的状态
+      updateSettingsVisibility(colorSpace);
+      
+      generatePalette();
+    });
+
+    // 历史记录相关函数
+    function addToHistory(colors, type) {
+      const historyItem = {
+        id: Date.now(),
+        colors: colors,
+        type: type,
+        timestamp: new Date().toLocaleString()
+      };
+
+      // 添加到历史记录开头
+      historyPalettes.unshift(historyItem);
+
+      // 限制历史记录数量为50条
+      if (historyPalettes.length > 50) {
+        historyPalettes = historyPalettes.slice(0, 50);
+      }
+
+      // 保存到本地存储
+      localStorage.setItem('historyPalettes', JSON.stringify(historyPalettes));
+    }
+
+    function showHistory() {
+      console.log('showHistory called'); // 调试信息
+      const modal = document.getElementById('historyModal');
+      const historyList = document.getElementById('historyList');
+      
+      if (!modal) {
+        console.error('Modal not found');
+        return;
+      }
+      
+      console.log('Modal element:', modal);
+      console.log('History palettes:', historyPalettes); // 调试信息
+      
+      // 清空历史记录列表
+      historyList.innerHTML = '';
+      
+      if (historyPalettes.length === 0) {
+        historyList.innerHTML = '<div style="text-align: center; color: #666; padding: 40px;">暂无历史记录</div>';
+      } else {
+        // 显示历史记录
+        historyPalettes.forEach(item => {
+          const historyItem = document.createElement('div');
+          historyItem.className = 'history-item';
+          
+          const colorsHtml = item.colors.map(color => 
+            `<div class="history-color" style="background: ${color}" data-color="${color}" title="${color}"></div>`
+          ).join('');
+          
+          historyItem.innerHTML = `
+            <div class="history-colors">
+              ${colorsHtml}
+            </div>
+            <div class="history-info">
+              <div class="history-type">${typeNames[item.type] || item.type}</div>
+              <div class="history-time">${item.timestamp}</div>
+            </div>
+            <div class="history-actions">
+              <button class="history-btn apply" data-id="${item.id}" data-action="apply">应用</button>
+              <button class="history-btn" data-id="${item.id}" data-action="delete">删除</button>
+            </div>
+          `;
+          
+          // 为历史记录按钮添加事件监听器
+          const applyBtn = historyItem.querySelector('.history-btn.apply');
+          const deleteBtn = historyItem.querySelector('.history-btn:not(.apply)');
+          
+          if (applyBtn) {
+            applyBtn.addEventListener('click', () => applyHistoryPalette(item.id));
+          }
+          
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => deleteHistoryItem(item.id));
+          }
+          
+          // 为历史记录颜色块添加点击事件监听器
+          const colorDivs = historyItem.querySelectorAll('.history-color');
+          colorDivs.forEach(colorDiv => {
+            colorDiv.addEventListener('click', () => {
+              const color = colorDiv.getAttribute('data-color');
+              copyToClipboard(color);
+            });
+          });
+          
+          historyList.appendChild(historyItem);
+        });
+      }
+      
+      // 显示模态框
+      modal.classList.add('show');
+      modal.style.display = 'flex';
+      console.log('Modal should be visible now'); // 调试信息
+      console.log('Modal display style:', modal.style.display);
+      console.log('Modal classList:', modal.classList);
+    }
+
+    function closeHistory() {
+      const modal = document.getElementById('historyModal');
+      modal.classList.remove('show');
+    }
+
+    function applyHistoryPalette(id) {
+      const item = historyPalettes.find(p => p.id === id);
+      if (item) {
+        // 设置配色类型
+        document.getElementById('paletteType').value = item.type;
+        
+        // 更新颜色数量
+        updateColorCount();
+        
+        // 生成配色
+        const palette = document.getElementById("palette");
+        palette.innerHTML = "";
+        
+        currentColors = [...item.colors]; // 更新当前颜色数组
+        lockedColors.clear(); // 重置锁定状态
+        
+        item.colors.forEach((color, index) => {
+          const box = document.createElement("div");
+          box.className = "color-box";
+          box.style.background = color;
+          const textColor = getTextColorForBackground(color);
+          box.style.color = textColor;
+          
+          const colorCode = document.createElement("div");
+          colorCode.className = "color-code";
+          colorCode.textContent = color;
+          
+          const colorActions = document.createElement("div");
+          colorActions.className = "color-actions";
+          colorActions.innerHTML = `
+            <button class="color-action-btn" data-index="${index}" data-action="lock" title="锁定颜色">
+              <span class="icon">🔒</span>
+              <span class="text">锁定</span>
+            </button>
+            <button class="color-action-btn" data-index="${index}" data-action="randomize" title="随机此颜色">
+              <span class="text">随机</span>
+            </button>
+            <button class="color-action-btn" data-index="${index}" data-action="darken" title="变深">
+              <span class="text">变深</span>
+            </button>
+            <button class="color-action-btn" data-index="${index}" data-action="lighten" title="变浅">
+              <span class="text">变浅</span>
+            </button>
+            <button class="color-action-btn" data-index="${index}" data-action="custom" title="自定义颜色">
+              <span class="text">自定义</span>
+            </button>
+          `;
+          
+          box.appendChild(colorCode);
+          box.appendChild(colorActions);
+          
+          // 动态调整按钮容器高度
+          adjustColorActionsHeight(box, colorActions);
+          
+          // 使用事件委托处理按钮点击
+          colorActions.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const target = e.target.closest('.color-action-btn');
+            if (!target) return;
+            
+            const index = parseInt(target.getAttribute('data-index'));
+            const action = target.getAttribute('data-action');
+            
+            switch(action) {
+              case 'lock':
+                lockColor(index);
+                break;
+              case 'randomize':
+                randomizeColor(index);
+                break;
+              case 'darken':
+                darkenColor(index);
+                break;
+              case 'lighten':
+                lightenColor(index);
+                break;
+              case 'custom':
+                customColor(index);
+                break;
+            }
+          });
+          
+          box.onclick = () => copyToClipboard(color);
+          palette.appendChild(box);
+        });
+
+        // 更新信息栏
+        updateInfoBar(item.colors, item.type);
+        
+        // 关闭历史记录模态框
+        closeHistory();
+      }
+    }
+
+    function deleteHistoryItem(id) {
+      if (confirm('确定要删除这条历史记录吗？')) {
+        historyPalettes = historyPalettes.filter(p => p.id !== id);
+        localStorage.setItem('historyPalettes', JSON.stringify(historyPalettes));
+        showHistory(); // 重新显示历史记录
+      }
+    }
+
+    // 点击模态框外部关闭
+    document.getElementById('historyModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeHistory();
+      }
+    });
+
+    // 点击保存模态框外部关闭
+    document.getElementById('saveModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeSaveModal();
+      }
+    });
+
+    // 添加全局错误处理
+    window.addEventListener('error', function(e) {
+      console.error('Global error:', e.error);
+    });
+
+    // 添加未处理的Promise拒绝处理
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('Unhandled promise rejection:', e.reason);
+    });
+
+    // 窗口大小改变时重新调整按钮高度
+    window.addEventListener('resize', function() {
+      setTimeout(() => {
+        const boxes = document.querySelectorAll('.color-box');
+        boxes.forEach(box => {
+          const colorActions = box.querySelector('.color-actions');
+          if (colorActions) {
+            adjustColorActionsHeight(box, colorActions);
+          }
+        });
+      }, 100);
+    });
+  </script>
+</body>
+</html> 

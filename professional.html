@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云彩配色-专业模式</title>
+  <link rel="icon" type="image/svg+xml" href="CloudPalette.svg">
+  <link rel="alternate icon" type="image/x-icon" href="CloudPalette.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      color: #1a1a1a;
+    }
+
+    .toolbar {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .logo:hover {
+      color: #007bff;
+    }
+    .logo img {
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .primary-color-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .primary-color-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .primary-color-picker {
+      width: 60px;
+      height: 40px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #81B9E9;
+    }
+
+    .primary-color-picker:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .primary-color-input {
+      width: 100px;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .control-group label {
+      font-size: 14px;
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+
+    .control-group select {
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #ffffff;
+      color: #1a1a1a;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .generate-btn {
+      padding: 12px 24px;
+      border: 2px solid #1a1a1a;
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      padding: 10px 16px;
+      border: 2px solid #d1d5db;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: #f3f4f6;
+      border-color: #1a1a1a;
+      color: #1a1a1a;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .main-content {
+      flex: 1;
+      display: flex;
+      gap: 24px;
+      padding: 24px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+      color: #1a1a1a;
+      align-items: stretch;
+    }
+
+    .palettes-section {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      height: 100%;
+    }
+
+ 
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .palettes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .palette-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .palette-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      border-color: #1a1a1a;
+    }
+
+    .palette-card.selected {
+      border-color: #1a1a1a;
+      background: #f8f9fa;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .palette-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .palette-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .palette-type {
+      font-size: 12px;
+      color: #4b5563;
+      background: #f3f4f6;
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    .palette-colors {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .color-row {
+      display: flex;
+      gap: 8px;
+      height: 50px;
+    }
+
+    .color-item {
+      border-radius: 8px;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .color-item:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-code {
+      color: #1a1a1a;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 4px 8px;
+      border-radius: 6px;
+      pointer-events: none;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .color-management-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-self: stretch;
+    }
+
+    .color-system-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .color-category {
+      margin-bottom: 24px;
+    }
+
+    .category-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-proportions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .color-proportion-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .color-proportion-item:hover {
+      background: #f3f4f6;
+    }
+
+    .proportion-color {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .proportion-color:hover {
+      transform: scale(1.1);
+    }
+
+    .proportion-info {
+      flex: 1;
+    }
+
+    .proportion-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+
+    .proportion-details {
+      font-size: 12px;
+      color: #4b5563;
+    }
+
+
+
+    .info-bar {
+      background: #ffffff;
+      border-top: 1px solid #e5e5e5;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .info-item strong {
+      color: #1a1a1a;
+      font-weight: 700;
+    }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      z-index: 1000;
+      font-size: 14px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+
+
+    /* 色盘选择器样式 */
+    .color-picker-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .color-picker-modal.show {
+      display: flex;
+    }
+
+    .color-picker-content {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .color-picker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .color-picker-header h3 {
+      margin: 0;
+      color: #1a1a1a;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      color: #4b5563;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: #f3f4f6;
+      color: #1a1a1a;
+    }
+
+    .color-picker-body {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .color-wheel {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      margin: 0 auto;
+      position: relative;
+      cursor: crosshair;
+      
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .color-wheel::before {
+      content: '';
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      background: #ffffff;
+      border-radius: 50%;
+      border: 2px solid #d1d5db;
+      z-index: 10;
+    }
+
+    .color-picker-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .color-picker-controls .control-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .color-picker-controls .control-group label {
+      min-width: 80px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .color-picker-controls .control-group input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e5e5;
+      outline: none;
+      cursor: pointer;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .color-picker-controls .control-group input[type="range"]::-webkit-slider-track {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e5e5 !important;
+    }
+
+    .color-picker-controls .control-group input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1a1a1a !important;
+      border: 2px solid #ffffff !important;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-picker-controls .control-group input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #1a1a1a !important;
+      border: 2px solid #ffffff !important;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      -moz-appearance: none;
+    }
+
+    .color-picker-controls .control-group input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 3px;
+      background: #e5e5e5 !important;
+      border: none;
+      -moz-appearance: none;
+    }
+
+    .color-picker-controls .control-group span {
+      min-width: 40px;
+      font-size: 12px;
+      color: #4b5563;
+      text-align: right;
+    }
+
+    .selected-color-preview {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .preview-color {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-color-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+
+    .color-picker-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    .confirm-btn, .cancel-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .confirm-btn {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+
+    .confirm-btn:hover {
+      background: #404040;
+    }
+
+    .cancel-btn {
+      background: #f8f9fa;
+      color: #4b5563;
+      border: 1px solid #d1d5db;
+    }
+
+    .cancel-btn:hover {
+      background: #f3f4f6;
+    }
+
+    /* 保存配色方案模态框样式 */
+    .saved-palettes-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .saved-palettes-content {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .saved-palettes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .saved-palettes-header h3 {
+      margin: 0;
+      color: #333;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .saved-palettes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .saved-palette-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+
+    .saved-palette-item:hover {
+      background: #e9ecef;
+      border-color: #667eea;
+    }
+
+    .saved-palette-info {
+      flex: 1;
+    }
+
+    .saved-palette-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .saved-palette-details {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .saved-palette-time {
+      font-size: 12px;
+      color: #999;
+    }
+
+    .saved-palette-colors {
+      display: flex;
+      gap: 4px;
+    }
+
+    .saved-color-preview {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-saved-btn {
+      background: none;
+      border: none;
+      color: #dc3545;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .delete-saved-btn:hover {
+      background: #dc3545;
+      color: white;
+    }
+
+    /* 暗色模式 */
+    body.dark {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+
+    body.dark .toolbar {
+      background: #1a1a1a;
+      border-bottom: 1px solid #404040;
+    }
+
+    body.dark .logo { 
+      color: #ffffff;
+    }
+    
+    body.dark .logo:hover {
+      color: #4dabf7;
+    }
+    
+    body.dark .primary-color-label,
+    body.dark .control-group label { color: #ffffff; }
+    
+    body.dark .control-group select { 
+      background: #1a1a1a; 
+      color: #ffffff; 
+      border-color: #404040; 
+    }
+    
+    body.dark .generate-btn { 
+      background: #ffffff;
+      color: #1a1a1a;
+      border-color: #ffffff;
+      box-shadow: 0 2px 8px rgba(255, 255, 255, 0.2);
+    }
+    
+    body.dark .generate-btn:hover {
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+    
+    body.dark .action-btn { 
+      background: #1a1a1a; 
+      color: #ffffff; 
+      border-color: #404040; 
+    }
+    
+    body.dark .action-btn:hover {
+      background: #404040;
+      border-color: #ffffff;
+      color: #ffffff;
+    }
+    
+    body.dark .palette-card,
+    body.dark .color-system-card { 
+      background: #1a1a1a; 
+      border-color: #404040;
+    }
+    
+    body.dark .palette-card:hover {
+      border-color: #ffffff;
+      background: #2a2a2a;
+    }
+    
+    body.dark .palette-card.selected {
+      border-color: #ffffff;
+      background: #2a2a2a;
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.1);
+    }
+    
+    body.dark .section-title,
+    body.dark .palette-title,
+    body.dark .category-title { color: #ffffff; }
+    
+    body.dark .palette-type { 
+      background: #404040; 
+      color: #ffffff; 
+    }
+    
+    body.dark .color-proportion-item {
+      background: #2a2a2a;
+      color: #ffffff;
+    }
+    
+    body.dark .color-proportion-item:hover {
+      background: #404040;
+    }
+    
+    body.dark .proportion-name { color: #ffffff; }
+    body.dark .proportion-details { color: #cccccc; }
+    
+    body.dark .info-bar { 
+      background: #1a1a1a; 
+      border-top: 1px solid #404040; 
+    }
+    
+    body.dark .info-item { color: #cccccc; }
+    body.dark .info-item strong { color: #ffffff; }
+
+    /* 暗色模式下的色盘选择器 */
+    body.dark .color-picker-content {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+    
+    body.dark .color-picker-header h3 {
+      color: #ffffff;
+    }
+    
+    body.dark .close-btn {
+      color: #cccccc;
+    }
+    
+    body.dark .close-btn:hover {
+      background: #404040;
+      color: #ffffff;
+    }
+    
+    body.dark .color-picker-controls .control-group label {
+      color: #ffffff;
+    }
+    
+    body.dark .color-picker-controls .control-group input[type="range"] {
+      background: #404040 !important;
+    }
+    
+    body.dark .color-picker-controls .control-group input[type="range"]::-webkit-slider-track {
+      background: #404040 !important;
+    }
+
+    body.dark .color-picker-controls .control-group input[type="range"]::-webkit-slider-thumb {
+      background: #ffffff !important;
+      border: 2px solid #1a1a1a !important;
+    }
+
+    body.dark .color-picker-controls .control-group input[type="range"]::-moz-range-thumb {
+      background: #ffffff !important;
+      border: 2px solid #1a1a1a !important;
+    }
+
+    body.dark .color-picker-controls .control-group input[type="range"]::-moz-range-track {
+      background: #404040 !important;
+    }
+    
+    body.dark .color-picker-controls .control-group span {
+      color: #cccccc;
+    }
+    
+    body.dark .selected-color-preview {
+      background: #2a2a2a;
+    }
+    
+    body.dark .preview-color-input {
+      background: #1a1a1a;
+      color: #ffffff;
+      border-color: #404040;
+    }
+    
+    body.dark .confirm-btn {
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+    
+    body.dark .confirm-btn:hover {
+      background: #cccccc;
+    }
+    
+    body.dark .cancel-btn {
+      background: #2a2a2a;
+      color: #ffffff;
+      border-color: #404040;
+    }
+    
+    body.dark .cancel-btn:hover {
+      background: #404040;
+    }
+
+    /* 暗色模式下的保存配色方案模态框 */
+    body.dark .saved-palettes-content {
+      background: #2d3748;
+      color: #e6e6e6;
+    }
+
+    body.dark .saved-palettes-header h3 {
+      color: #e6e6e6;
+    }
+
+    body.dark .saved-palette-item {
+      background: #4a5568;
+      color: #cbd5e0;
+    }
+
+    body.dark .saved-palette-item:hover {
+      background: #2d3748;
+      border-color: #81e6d9;
+    }
+
+    body.dark .saved-palette-title {
+      color: #e6e6e6;
+    }
+
+    body.dark .saved-palette-details {
+      color: #a0aec0;
+    }
+
+    body.dark .saved-palette-time {
+      color: #718096;
+    }
+
+    body.dark .delete-saved-btn {
+      color: #fc8181;
+    }
+
+    body.dark .delete-saved-btn:hover {
+      background: #fc8181;
+      color: #1a202c;
+    }
+
+    /* 暗色模式下的保存模态框 */
+    body.dark .save-content {
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+
+    body.dark .save-header {
+      background: #2a2a2a;
+      border-bottom: 1px solid #404040;
+    }
+
+    body.dark .save-option-btn {
+      background: #1a1a1a;
+      border-color: #404040;
+      color: #ffffff;
+    }
+
+    body.dark .save-option-btn:hover {
+      background: #2a2a2a;
+      border-color: #ffffff;
+    }
+
+    body.dark .save-option-btn .text {
+      color: #ffffff;
+    }
+
+    body.dark .save-option-btn .desc {
+      color: #cccccc;
+    }
+
+    /* 保存模态框样式 */
+    .save-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+        width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      backdrop-filter: blur(5px);
+    }
+
+    .save-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow: hidden;
+    }
+
+    .save-header {
+      display: flex;
+        justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      background: #1a1a1a;
+      color: #ffffff;
+    }
+
+    .save-header h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .save-options {
+      padding: 24px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .save-option-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 20px;
+      border: 2px solid #e5e5e5;
+      border-radius: 12px;
+      background: #ffffff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      width: 100%;
+    }
+
+    .save-option-btn:hover {
+      border-color: #1a1a1a;
+      background: #f8f9fa;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .save-option-btn .text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a1a1a;
+      width: 100%;
+    }
+
+    .save-option-btn .desc {
+      font-size: 12px;
+      color: #4b5563;
+      margin-top: 4px;
+    }
+
+    .save-option-btn .text,
+    .save-option-btn .desc {
+      display: block;
+    }
+
+    @media (max-width: 1200px) {
+      .main-content {
+        flex-direction: column;
+        gap: 20px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .toolbar {
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .toolbar-left {
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+      }
+
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 12px;
+      }
+
+      .control-group {
+        justify-content: space-between;
+      }
+
+      .main-content {
+        padding: 16px;
+      }
+
+      .palettes-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <a href="index.html" class="logo"><img src="CloudPalette.svg" alt="CloudPalette Logo"> 云彩配色 Pro</a>
+      <div class="primary-color-section">
+        <span class="primary-color-label">主色:</span>
+        <div class="primary-color-picker" id="primaryColorPicker"></div>
+        <input type="text" class="primary-color-input" id="primaryColorInput" value="#81B9E9" placeholder="#81B9E9">
+      </div>
+      <div class="controls">
+        <div class="control-group">
+          <label>风格主题:</label>
+          <select id="styleTheme">
+            <option value="modern">现代简约</option>
+            <option value="natural">自然清新</option>
+            <option value="elegant">优雅经典</option>
+            <option value="vibrant">活力鲜艳</option>
+            <option value="retro">复古怀旧</option>
+            <option value="tech">科技感</option>
+          </select>
+        </div>
+
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <a href="index.html" class="action-btn" title="返回探索模式">探索</a>
+      <button class="action-btn" id="saveBtn" title="保存配色方案">保存</button>
+      <button class="action-btn" id="toggleThemeBtn" title="切换暗色模式">主题</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="palettes-section">
+      <div class="palettes-grid" id="palettesGrid">
+        <!-- 配色方案将在这里动态生成 -->
+      </div>
+    </div>
+
+    <div class="color-management-section">
+      <div class="color-system-card">
+        <div class="section-title">专业色彩管理</div>
+        
+        <div class="color-category">
+          <div class="category-title">主色系统</div>
+          <div class="color-proportions" id="primaryColors">
+            <!-- 主色将在这里显示 -->
+          </div>
+    </div>
+
+        <div class="color-category">
+          <div class="category-title">辅助色系统</div>
+          <div class="color-proportions" id="secondaryColors">
+            <!-- 辅助色将在这里显示 -->
+        </div>
+        </div>
+
+        <div class="color-category">
+          <div class="category-title">强调色系统</div>
+          <div class="color-proportions" id="accentColors">
+            <!-- 强调色将在这里显示 -->
+        </div>
+      </div>
+
+        <div class="color-category">
+          <div class="category-title">中性色系统</div>
+          <div class="color-proportions" id="neutralColors">
+            <!-- 中性色将在这里显示 -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-bar">
+    <div class="info-item">
+          <span>主色: <strong id="currentPrimaryColor">#81B9E9</strong></span>
+    </div>
+    <div class="info-item">
+          <span>风格主题: <strong id="currentStyleTheme">现代简约</strong></span>
+    </div>
+    <div class="info-item">
+          <span>选中方案: <strong id="selectedPalette">未选择</strong></span>
+    </div>
+    <div class="info-item">
+      <span>生成时间: <strong id="generateTime">-</strong></span>
+    </div>
+  </div>
+
+  <div class="notification" id="notification"></div>
+
+  <!-- 色盘选择器 -->
+  <div class="color-picker-modal" id="colorPickerModal">
+    <div class="color-picker-content">
+      <div class="color-picker-header">
+        <h3>选择主色</h3>
+        <button class="close-btn" id="closeColorPicker">×</button>
+      </div>
+      <div class="color-picker-body">
+        <div class="color-wheel" id="colorWheel">
+          <!-- 色盘将在这里生成 -->
+        </div>
+        <div class="color-picker-controls">
+          <div class="control-group">
+            <label>色相 (H):</label>
+            <input type="range" id="hueSlider" min="0" max="360" value="0">
+            <span id="hueValue">0°</span>
+          </div>
+          <div class="control-group">
+            <label>饱和度 (S):</label>
+            <input type="range" id="saturationSlider" min="0" max="100" value="100">
+            <span id="saturationValue">100%</span>
+          </div>
+          <div class="control-group">
+            <label>明度 (L):</label>
+            <input type="range" id="lightnessSlider" min="0" max="100" value="50">
+            <span id="lightnessValue">50%</span>
+          </div>
+          <div class="selected-color-preview">
+            <div class="preview-color" id="previewColor"></div>
+            <input type="text" id="previewColorInput" value="#FF0000" readonly>
+          </div>
+          <div class="color-picker-actions">
+            <button class="confirm-btn" id="confirmColor">确认</button>
+            <button class="cancel-btn" id="cancelColor">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 保存格式选择模态框 -->
+  <div class="save-modal" id="saveModal">
+    <div class="save-content">
+      <div class="save-header">
+        <h3>选择保存格式</h3>
+        <button class="close-btn" id="saveCloseBtn">×</button>
+      </div>
+      <div class="save-options">
+        <button class="save-option-btn" id="saveLocalBtn">
+          <span class="text">保存到本地</span>
+          <span class="desc">保存到浏览器本地存储</span>
+        </button>
+        <button class="save-option-btn" id="saveCSSBtn">
+          <span class="text">导出为CSS</span>
+          <span class="desc">下载CSS文件</span>
+        </button>
+        <button class="save-option-btn" id="saveJSONBtn">
+          <span class="text">导出为JSON</span>
+          <span class="desc">下载JSON文件</span>
+        </button>
+        <button class="save-option-btn" id="saveTXTBtn">
+          <span class="text">导出为TXT</span>
+          <span class="desc">下载文本文件</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const paletteTypeDescriptions = {
+      analogous: "类似色配色 - 色相环上相邻的颜色，和谐统一",
+      complementary: "互补色配色 - 色相环上相对的颜色，对比强烈",
+      triadic: "三角配色 - 色相环上等距的三个颜色，平衡稳定",
+      'split-complementary': "分裂互补配色 - 主色与互补色两侧的颜色",
+      tetradic: "四分配色 - 色相环上等距的四个颜色，丰富多样",
+      monochromatic: "单色配色 - 同一色相的不同明度和饱和度"
+    };
+
+    const styleThemes = {
+      modern: { name: "现代简约", adjustments: { saturation: 0.8, lightness: 1.1 } },
+      natural: { name: "自然清新", adjustments: { saturation: 0.7, lightness: 1.0 } },
+      elegant: { name: "优雅经典", adjustments: { saturation: 0.9, lightness: 0.9 } },
+      vibrant: { name: "活力鲜艳", adjustments: { saturation: 1.2, lightness: 1.1 } },
+      retro: { name: "复古怀旧", adjustments: { saturation: 0.8, lightness: 0.9 } },
+      tech: { name: "科技感", adjustments: { saturation: 1.1, lightness: 1.0 } }
+    };
+
+    let currentPrimaryColor = '#81B9E9';
+    let currentStyleTheme = 'modern';
+    let colorPalettes = [];
+    let selectedPaletteIndex = -1;
+
+    function hexToHSL(hex) {
+      let r = parseInt(hex.slice(1, 3), 16) / 255;
+      let g = parseInt(hex.slice(3, 5), 16) / 255;
+      let b = parseInt(hex.slice(5, 7), 16) / 255;
+      
+      let max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+
+      if (max === min) {
+        h = s = 0;
+      } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+
+      return [h * 360, s * 100, l * 100];
+    }
+
+    function hslToHex(h, s, l) {
+      l /= 100;
+      const a = s * Math.min(l, 1 - l) / 100;
+      const f = n => {
+        const k = (n + h / 30) % 12;
+        const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+        return Math.round(255 * color).toString(16).padStart(2, '0');
+      };
+      return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
+    }
+
+    function adjustColorForStyle(h, s, l, style) {
+      const adjustments = styleThemes[style].adjustments;
+      return {
+        h: h,
+        s: Math.min(100, s * adjustments.saturation),
+        l: Math.min(100, l * adjustments.lightness)
+      };
+    }
+
+    function generateAllPaletteTypes(primaryColor, style) {
+      const [baseH, baseS, baseL] = hexToHSL(primaryColor);
+      const paletteTypes = ['analogous', 'complementary', 'triadic', 'split-complementary', 'tetradic', 'monochromatic'];
+      const palettes = [];
+      
+      paletteTypes.forEach((type, index) => {
+        const colors = [];
+        
+        switch (type) {
+          case 'analogous':
+            // 确保主色在首位
+            colors.push(primaryColor);
+            // 生成类似色，跳过主色位置
+            for (let i = 1; i < 5; i++) {
+              const hue = (baseH + (i - 1) * 30) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            break;
+            
+          case 'complementary':
+            colors.push(primaryColor);
+            const compHue = (baseH + 180) % 360;
+            const { s: compS, l: compL } = adjustColorForStyle(compHue, baseS, baseL, style);
+            colors.push(hslToHex(compHue, compS, compL));
+            
+            for (let i = 1; i < 4; i++) {
+              const hue = (baseH + i * 60) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            break;
+            
+          case 'triadic':
+            // 确保主色在首位
+            colors.push(primaryColor);
+            // 生成三角配色的其他两个主色
+            for (let i = 1; i < 3; i++) {
+              const hue = (baseH + i * 120) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            // 添加变体
+            for (let i = 0; i < 2; i++) {
+              const hue = (baseH + i * 60 + 30) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            break;
+            
+          case 'split-complementary':
+            colors.push(primaryColor);
+            const splitHue1 = (baseH + 150) % 360;
+            const splitHue2 = (baseH + 210) % 360;
+            const { s: s1, l: l1 } = adjustColorForStyle(splitHue1, baseS, baseL, style);
+            const { s: s2, l: l2 } = adjustColorForStyle(splitHue2, baseS, baseL, style);
+            colors.push(hslToHex(splitHue1, s1, l1));
+            colors.push(hslToHex(splitHue2, s2, l2));
+            
+            for (let i = 0; i < 2; i++) {
+              const hue = (baseH + i * 90 + 45) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            break;
+            
+          case 'tetradic':
+            // 确保主色在首位
+            colors.push(primaryColor);
+            // 生成四分配色的其他三个主色
+            for (let i = 1; i < 4; i++) {
+              const hue = (baseH + i * 90) % 360;
+              const { s, l } = adjustColorForStyle(hue, baseS, baseL, style);
+              colors.push(hslToHex(hue, s, l));
+            }
+            // 添加变体
+            const tetradicHue = (baseH + 45) % 360;
+            const { s: tetradicS, l: tetradicL } = adjustColorForStyle(tetradicHue, baseS, baseL, style);
+            colors.push(hslToHex(tetradicHue, tetradicS, tetradicL));
+            break;
+            
+          case 'monochromatic':
+            colors.push(primaryColor);
+            {
+              const existing = new Set(colors);
+              // 确保明度变化更加均匀，避免生成过于接近黑色的颜色
+              const lightnessSteps = [0.3, 0.5, 0.7, 0.9]; // 明度步长：30%, 50%, 70%, 90%
+              const saturationSteps = [0.4, 0.6, 0.8, 1.0]; // 饱和度步长：40%, 60%, 80%, 100%
+              
+              for (let i = 0; i < 4; i++) {
+                let newS = Math.max(30, baseS * saturationSteps[i]);
+                let newL = Math.max(25, Math.min(85, baseL * lightnessSteps[i]));
+                
+                // 如果主色明度较低，调整生成策略
+                if (baseL < 40) {
+                  newL = Math.max(35, Math.min(85, 30 + i * 15));
+                } else if (baseL > 70) {
+                  newL = Math.max(25, Math.min(75, 80 - i * 15));
+                }
+                
+                let color = hslToHex(baseH, newS, newL);
+                let attempts = 0;
+                while (existing.has(color) && attempts < 10) {
+                  newL = Math.max(25, Math.min(85, newL + (attempts % 2 === 0 ? 5 : -5)));
+                  newS = Math.max(30, Math.min(100, newS + (attempts % 2 === 0 ? 8 : -8)));
+                  color = hslToHex(baseH, newS, newL);
+                  attempts++;
+                }
+                if (!existing.has(color)) {
+                  colors.push(color);
+                  existing.add(color);
+                }
+              }
+            }
+            break;
+        }
+        
+        palettes.push({
+          colors: colors,
+          type: type,
+          index: index
+        });
+      });
+      
+      return palettes;
+    }
+
+    function generateColorSystem(selectedPalette, style) {
+      if (!selectedPalette) return null;
+      
+      const colors = selectedPalette.colors;
+      const [baseH, baseS, baseL] = hexToHSL(colors[0]); // 使用第一个颜色作为主色
+      
+      // 根据配色方案类型生成不同的色彩系统
+      const colorSystem = {
+        primary: [],
+        secondary: [],
+        accent: [],
+        neutral: []
+      };
+      
+      // 主色系统（60%使用比例）
+      colorSystem.primary.push({
+        color: colors[0],
+        name: "主色",
+        usage: "60%",
+        description: "配色方案主色调"
+      });
+      
+      // 根据配色类型分配其他颜色
+      if (selectedPalette.type === 'analogous') {
+        // 类似色配色：前3个颜色作为主色系统
+        for (let i = 1; i < Math.min(3, colors.length); i++) {
+          colorSystem.primary.push({
+            color: colors[i],
+            name: `主色${i + 1}`,
+            usage: `${40 - i * 10}%`,
+            description: "类似色系主色"
+          });
+        }
+        
+        // 剩余颜色作为辅助色
+        for (let i = 3; i < colors.length; i++) {
+          colorSystem.secondary.push({
+            color: colors[i],
+            name: `辅助色${i - 2}`,
+            usage: `${20 - (i - 3) * 5}%`,
+            description: "支持主色的辅助色"
+          });
+        }
+      } else if (selectedPalette.type === 'complementary') {
+        // 互补色配色：主色 + 互补色
+        colorSystem.primary.push({
+          color: colors[1],
+          name: "互补主色",
+          usage: "30%",
+          description: "与主色互补的颜色"
+        });
+        
+        // 其他颜色作为辅助色
+        for (let i = 2; i < colors.length; i++) {
+          colorSystem.secondary.push({
+            color: colors[i],
+            name: `辅助色${i - 1}`,
+            usage: `${15 - (i - 2) * 3}%`,
+            description: "平衡配色的辅助色"
+          });
+        }
+      } else if (selectedPalette.type === 'triadic') {
+        // 三角配色：三个主色
+        for (let i = 1; i < Math.min(3, colors.length); i++) {
+          colorSystem.primary.push({
+            color: colors[i],
+            name: `主色${i + 1}`,
+            usage: `${40 - i * 10}%`,
+            description: "三角配色主色"
+          });
+        }
+        
+        // 剩余颜色作为辅助色
+        for (let i = 3; i < colors.length; i++) {
+          colorSystem.secondary.push({
+            color: colors[i],
+            name: `辅助色${i - 2}`,
+            usage: `${10 - (i - 3) * 2}%`,
+            description: "三角配色辅助色"
+          });
+        }
+      } else {
+        // 其他配色类型：前2个作为主色，其余作为辅助色
+        for (let i = 1; i < Math.min(2, colors.length); i++) {
+          colorSystem.primary.push({
+            color: colors[i],
+            name: `主色${i + 1}`,
+            usage: `${30 - i * 10}%`,
+            description: "配色方案主色"
+          });
+        }
+        
+        for (let i = 2; i < colors.length; i++) {
+          colorSystem.secondary.push({
+            color: colors[i],
+            name: `辅助色${i - 1}`,
+            usage: `${10 - (i - 2) * 2}%`,
+            description: "配色方案辅助色"
+          });
+        }
+      }
+      
+      // 强调色系统（10%使用比例）- 选择对比度最高的颜色
+      const accentColor = colors.reduce((max, color) => {
+        const [h, s, l] = hexToHSL(color);
+        const contrast = Math.abs(h - baseH) + Math.abs(s - baseS) + Math.abs(l - baseL);
+        return contrast > max.contrast ? { color, contrast } : max;
+      }, { color: colors[0], contrast: 0 });
+      
+      colorSystem.accent.push({
+        color: accentColor.color,
+        name: "强调色",
+        usage: "10%",
+        description: "突出重点的强调色"
+      });
+      
+      // 中性色系统（5%使用比例）- 生成基于主色的中性色
+      colorSystem.neutral.push({
+        color: hslToHex(baseH, Math.max(5, baseS * 0.3), 50),
+        name: "中性色",
+        usage: "5%",
+        description: "平衡色彩的中性色"
+      });
+      
+      colorSystem.neutral.push({
+        color: hslToHex(baseH, Math.max(5, baseS * 0.2), 80),
+        name: "中性色浅",
+        usage: "3%",
+        description: "背景色"
+      });
+      
+      colorSystem.neutral.push({
+        color: hslToHex(baseH, Math.max(5, baseS * 0.4), 20),
+        name: "中性色深",
+        usage: "2%",
+        description: "文字色"
+      });
+      
+      return colorSystem;
+    }
+
+    function showNotification(message, type = 'success') {
+      const notification = document.getElementById('notification');
+      notification.textContent = message;
+      notification.style.background = type === 'success' ? 
+        '#28a745' : '#dc3545';
+      notification.classList.add('show');
+      
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 2000);
+    }
+
+    function createPaletteCard(colors, type, index) {
+      const card = document.createElement('div');
+      card.className = 'palette-card';
+      card.dataset.index = index;
+      
+      const colorsHtml = colors.map(color => `
+        <div class="color-item" style="background-color: ${color}; flex: 1;" onclick="copyColor('${color}')" title="点击复制颜色代码">
+          <div class="color-code">${color}</div>
+        </div>
+      `).join('');
+      
+      card.innerHTML = `
+        <div class="palette-header">
+          <div class="palette-type">${paletteTypeDescriptions[type]}</div>
+        </div>
+        <div class="palette-colors">
+          <div class="color-row">
+            ${colorsHtml}
+          </div>
+        </div>
+      `;
+      
+      // 添加点击选择事件
+      card.addEventListener('click', function(e) {
+        // 如果点击的是颜色项，不处理选择
+        if (e.target.closest('.color-item')) return;
+        
+        // 更新选择状态
+        selectedPaletteIndex = index;
+        document.getElementById('selectedPalette').textContent = `配色方案 ${index + 1} - ${paletteTypeDescriptions[type]}`;
+        
+        // 更新卡片选择状态
+        document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        
+        // 更新右侧色彩管理系统
+        updateColorSystemDisplay();
+        
+        showNotification(`已选择配色方案 ${index + 1}`);
+      });
+      
+      return card;
+    }
+
+    function createColorProportionItem(colorInfo) {
+      const item = document.createElement('div');
+      item.className = 'color-proportion-item';
+      
+      item.innerHTML = `
+        <div class="proportion-color" style="background-color: ${colorInfo.color}" onclick="copyColor('${colorInfo.color}')" title="点击复制颜色代码"></div>
+        <div class="proportion-info">
+          <div class="proportion-name">${colorInfo.name}</div>
+          <div class="proportion-details">${colorInfo.description}</div>
+        </div>
+      `;
+      
+      return item;
+    }
+
+    function generateAllPalettes() {
+      const styleTheme = document.getElementById('styleTheme').value;
+      
+      currentStyleTheme = styleTheme;
+      
+      document.getElementById('currentPrimaryColor').textContent = currentPrimaryColor;
+      document.getElementById('currentStyleTheme').textContent = styleThemes[styleTheme].name;
+      document.getElementById('generateTime').textContent = new Date().toLocaleTimeString();
+
+      // 生成6种固定配色方案
+      colorPalettes = generateAllPaletteTypes(currentPrimaryColor, styleTheme);
+      
+      // 重置选择状态
+      selectedPaletteIndex = -1;
+      document.getElementById('selectedPalette').textContent = '未选择';
+      
+      updatePalettesDisplay();
+      updateColorSystemDisplay();
+      
+      showNotification(`已生成 ${colorPalettes.length} 个配色方案`);
+    }
+
+    function updatePalettesDisplay() {
+      const container = document.getElementById('palettesGrid');
+      container.innerHTML = '';
+      
+      colorPalettes.forEach((palette, index) => {
+        const card = createPaletteCard(palette.colors, palette.type, index);
+        container.appendChild(card);
+      });
+    }
+
+    function updateColorSystemDisplay() {
+      const selectedPalette = colorPalettes[selectedPaletteIndex];
+      
+      if (!selectedPalette) {
+        // 如果没有选中的配色方案，清空显示
+        document.getElementById('primaryColors').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">请选择左侧的配色方案</div>';
+        document.getElementById('secondaryColors').innerHTML = '';
+        document.getElementById('accentColors').innerHTML = '';
+        document.getElementById('neutralColors').innerHTML = '';
+        return;
+      }
+      
+      const colorSystem = generateColorSystem(selectedPalette, currentStyleTheme);
+      
+      const primaryContainer = document.getElementById('primaryColors');
+      primaryContainer.innerHTML = '';
+      colorSystem.primary.forEach(colorInfo => {
+        primaryContainer.appendChild(createColorProportionItem(colorInfo));
+      });
+      
+      const secondaryContainer = document.getElementById('secondaryColors');
+      secondaryContainer.innerHTML = '';
+      colorSystem.secondary.forEach(colorInfo => {
+        secondaryContainer.appendChild(createColorProportionItem(colorInfo));
+      });
+      
+      const accentContainer = document.getElementById('accentColors');
+      accentContainer.innerHTML = '';
+      colorSystem.accent.forEach(colorInfo => {
+        accentContainer.appendChild(createColorProportionItem(colorInfo));
+      });
+      
+      const neutralContainer = document.getElementById('neutralColors');
+      neutralContainer.innerHTML = '';
+      colorSystem.neutral.forEach(colorInfo => {
+        neutralContainer.appendChild(createColorProportionItem(colorInfo));
+      });
+    }
+
+    function copyColor(color) {
+      navigator.clipboard.writeText(color).then(() => {
+        showNotification('颜色代码已复制到剪贴板！');
+      }).catch(() => {
+        // 降级方案
+        const textArea = document.createElement('textarea');
+        textArea.value = color;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        showNotification('颜色代码已复制到剪贴板！');
+      });
+    }
+
+    // 保存配色方案功能
+    function saveCurrentPalettes() {
+      if (colorPalettes.length === 0) {
+        showNotification('没有可保存的配色方案', 'error');
+        return;
+      }
+      
+      const saveData = {
+        timestamp: new Date().toISOString(),
+        primaryColor: currentPrimaryColor,
+        styleTheme: currentStyleTheme,
+        palettes: colorPalettes,
+        selectedPaletteIndex: selectedPaletteIndex
+      };
+      
+      // 获取已保存的方案
+      const existingSaves = JSON.parse(localStorage.getItem('savedColorPalettes') || '[]');
+      
+      // 添加新的保存
+      existingSaves.push(saveData);
+      
+      // 限制保存数量（最多保存10个）
+      if (existingSaves.length > 10) {
+        existingSaves.shift(); // 删除最旧的
+      }
+      
+      // 保存到本地存储
+      localStorage.setItem('savedColorPalettes', JSON.stringify(existingSaves));
+      
+      showNotification(`已保存 ${colorPalettes.length} 个配色方案`);
+    }
+
+    // 加载保存的配色方案
+    function loadSavedPalettes() {
+      const savedData = JSON.parse(localStorage.getItem('savedColorPalettes') || '[]');
+      if (savedData.length === 0) {
+        showNotification('没有保存的配色方案', 'error');
+        return;
+      }
+      
+      // 显示保存列表
+      showSavedPalettesList(savedData);
+    }
+
+    // 显示保存的配色方案列表
+    function showSavedPalettesList(savedData) {
+      const modal = document.createElement('div');
+      modal.className = 'saved-palettes-modal';
+      modal.innerHTML = `
+        <div class="saved-palettes-content">
+          <div class="saved-palettes-header">
+            <h3>保存的配色方案</h3>
+            <button class="close-btn" onclick="this.closest('.saved-palettes-modal').remove()">×</button>
+          </div>
+          <div class="saved-palettes-list">
+            ${savedData.map((save, index) => `
+              <div class="saved-palette-item" onclick="loadSavedPalette(${index})">
+                <div class="saved-palette-info">
+                  <div class="saved-palette-title">配色方案 ${savedData.length - index}</div>
+                  <div class="saved-palette-details">
+                    主色: ${save.primaryColor} | 风格: ${styleThemes[save.styleTheme].name}
+        </div>
+                  <div class="saved-palette-time">${new Date(save.timestamp).toLocaleString()}</div>
+              </div>
+                <div class="saved-palette-colors">
+                  ${save.palettes[0].colors.slice(0, 5).map(color => 
+                    `<div class="saved-color-preview" style="background-color: ${color}"></div>`
+                  ).join('')}
+          </div>
+                <button class="delete-saved-btn" onclick="deleteSavedPalette(${index}); event.stopPropagation();">删除</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    }
+
+    // 加载指定的保存配色方案
+    function loadSavedPalette(index) {
+      const savedData = JSON.parse(localStorage.getItem('savedColorPalettes') || '[]');
+      if (index >= 0 && index < savedData.length) {
+        const save = savedData[index];
+        
+        // 恢复配色方案
+        currentPrimaryColor = save.primaryColor;
+        currentStyleTheme = save.styleTheme;
+        colorPalettes = save.palettes;
+        selectedPaletteIndex = save.selectedPaletteIndex;
+        
+        // 更新界面
+        document.getElementById('primaryColorInput').value = currentPrimaryColor;
+        document.getElementById('primaryColorPicker').style.backgroundColor = currentPrimaryColor;
+        document.getElementById('styleTheme').value = currentStyleTheme;
+        
+        updatePalettesDisplay();
+        updateColorSystemDisplay();
+        
+        // 关闭模态框
+        document.querySelector('.saved-palettes-modal').remove();
+        
+      showNotification('配色方案已加载');
+      }
+    }
+
+    // 删除保存的配色方案
+    function deleteSavedPalette(index) {
+      const savedData = JSON.parse(localStorage.getItem('savedColorPalettes') || '[]');
+      if (index >= 0 && index < savedData.length) {
+        savedData.splice(index, 1);
+        localStorage.setItem('savedColorPalettes', JSON.stringify(savedData));
+        
+        // 重新显示列表
+        document.querySelector('.saved-palettes-modal').remove();
+        showSavedPalettesList(savedData);
+        
+        showNotification('配色方案已删除');
+      }
+    }
+
+    // 保存模态框相关函数
+    function showSaveModal() {
+      document.getElementById('saveModal').style.display = 'block';
+    }
+
+    function closeSaveModal() {
+      document.getElementById('saveModal').style.display = 'none';
+    }
+
+    function saveAsCSS() {
+      if (colorPalettes.length === 0) {
+        showNotification('没有可保存的配色方案', 'error');
+        return;
+      }
+
+      let css = '/* 专业配色方案 CSS */\n';
+      colorPalettes.forEach((palette, paletteIndex) => {
+        css += `\n/* ${palette.type} 配色方案 */\n`;
+        palette.colors.forEach((color, colorIndex) => {
+          css += `.palette-${paletteIndex + 1}-color-${colorIndex + 1} {\n  background-color: ${color};\n}\n`;
+        });
+      });
+
+      const blob = new Blob([css], { type: 'text/css' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'professional-color-palette.css';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+      showNotification('CSS文件已下载');
+    }
+
+    function saveAsJSON() {
+      if (colorPalettes.length === 0) {
+        showNotification('没有可保存的配色方案', 'error');
+        return;
+      }
+      
+      const data = {
+        primaryColor: currentPrimaryColor,
+        styleTheme: currentStyleTheme,
+        palettes: colorPalettes,
+        selectedPaletteIndex: selectedPaletteIndex,
+        generatedAt: new Date().toISOString()
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'professional-color-palette.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+      showNotification('JSON文件已下载');
+    }
+
+    function saveAsTXT() {
+      if (colorPalettes.length === 0) {
+        showNotification('没有可保存的配色方案', 'error');
+        return;
+      }
+
+      const timestamp = new Date().toLocaleString();
+      
+      let txt = `专业配色方案\n`;
+      txt += `生成时间: ${timestamp}\n`;
+      txt += `主色: ${currentPrimaryColor}\n`;
+      txt += `风格主题: ${styleThemes[currentStyleTheme].name}\n`;
+      txt += `配色方案数量: ${colorPalettes.length}\n\n`;
+      
+      colorPalettes.forEach((palette, paletteIndex) => {
+        txt += `${paletteIndex + 1}. ${palette.type} 配色方案:\n`;
+        palette.colors.forEach((color, colorIndex) => {
+          txt += `   ${colorIndex + 1}. ${color}\n`;
+        });
+        txt += '\n';
+      });
+
+      const blob = new Blob([txt], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'professional-color-palette.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSaveModal();
+      showNotification('TXT文件已下载');
+    }
+
+    // 色盘选择器功能
+    function initColorPicker() {
+      const colorWheel = document.getElementById('colorWheel');
+      const hueSlider = document.getElementById('hueSlider');
+      const saturationSlider = document.getElementById('saturationSlider');
+      const lightnessSlider = document.getElementById('lightnessSlider');
+      const hueValue = document.getElementById('hueValue');
+      const saturationValue = document.getElementById('saturationValue');
+      const lightnessValue = document.getElementById('lightnessValue');
+      const previewColor = document.getElementById('previewColor');
+      const previewColorInput = document.getElementById('previewColorInput');
+      
+      let currentHue = 0;
+      let currentSaturation = 100;
+      let currentLightness = 50;
+      
+      // 创建色盘
+      function createColorWheel() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200;
+        canvas.height = 200;
+        const ctx = canvas.getContext('2d');
+        
+        const centerX = 100;
+        const centerY = 100;
+        const radius = 80;
+        
+        for (let angle = 0; angle < 360; angle += 1) {
+          const hue = angle;
+          const x1 = centerX + Math.cos((angle - 90) * Math.PI / 180) * 30;
+          const y1 = centerY + Math.sin((angle - 90) * Math.PI / 180) * 30;
+          const x2 = centerX + Math.cos((angle - 90) * Math.PI / 180) * radius;
+          const y2 = centerY + Math.sin((angle - 90) * Math.PI / 180) * radius;
+          
+          const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+          gradient.addColorStop(0, `hsl(${hue}, 0%, 50%)`);
+          gradient.addColorStop(1, `hsl(${hue}, 100%, 50%)`);
+          
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.stroke();
+        }
+        
+        colorWheel.appendChild(canvas);
+      }
+      
+      // 更新预览颜色
+      function updatePreviewColor() {
+        const color = hslToHex(currentHue, currentSaturation, currentLightness);
+        previewColor.style.backgroundColor = color;
+        previewColorInput.value = color;
+      }
+      
+      // 色盘点击事件
+      colorWheel.addEventListener('click', function(e) {
+        const rect = colorWheel.getBoundingClientRect();
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        const x = e.clientX - rect.left - centerX;
+        const y = e.clientY - rect.top - centerY;
+        
+        // 计算角度和距离
+        const angle = Math.atan2(y, x) * 180 / Math.PI + 90;
+        const distance = Math.sqrt(x * x + y * y);
+        
+        if (distance >= 30 && distance <= 80) {
+          currentHue = (angle + 360) % 360;
+          currentSaturation = Math.min(100, Math.max(0, (distance - 30) / 50 * 100));
+          
+          hueSlider.value = currentHue;
+          saturationSlider.value = currentSaturation;
+          
+          hueValue.textContent = Math.round(currentHue) + '°';
+          saturationValue.textContent = Math.round(currentSaturation) + '%';
+          
+          updatePreviewColor();
+        }
+      });
+      
+      // 滑块事件
+      hueSlider.addEventListener('input', function() {
+        currentHue = parseInt(this.value);
+        hueValue.textContent = currentHue + '°';
+        updatePreviewColor();
+      });
+      
+      saturationSlider.addEventListener('input', function() {
+        currentSaturation = parseInt(this.value);
+        saturationValue.textContent = currentSaturation + '%';
+        updatePreviewColor();
+      });
+      
+      lightnessSlider.addEventListener('input', function() {
+        currentLightness = parseInt(this.value);
+        lightnessValue.textContent = currentLightness + '%';
+        updatePreviewColor();
+      });
+      
+      // 初始化
+      createColorWheel();
+      updatePreviewColor();
+      
+      return {
+        getCurrentColor: () => hslToHex(currentHue, currentSaturation, currentLightness),
+        setColor: (hexColor) => {
+          const [h, s, l] = hexToHSL(hexColor);
+          currentHue = h;
+          currentSaturation = s;
+          currentLightness = l;
+          
+          hueSlider.value = h;
+          saturationSlider.value = s;
+          lightnessSlider.value = l;
+          
+          hueValue.textContent = Math.round(h) + '°';
+          saturationValue.textContent = Math.round(s) + '%';
+          lightnessValue.textContent = Math.round(l) + '%';
+          
+          updatePreviewColor();
+        }
+      };
+    }
+
+    // 色盘选择器实例
+    let colorPicker;
+    
+    // 保存的配色方案
+    let savedPalettes = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const primaryColorPicker = document.getElementById('primaryColorPicker');
+      const colorInput = document.getElementById('primaryColorInput');
+      
+      primaryColorPicker.style.backgroundColor = currentPrimaryColor;
+      
+      // 初始化主题 - 从探索模式获取主题设置
+      const savedTheme = localStorage.getItem('preferredTheme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        const btn = document.getElementById('toggleThemeBtn');
+        if (btn) {
+          btn.textContent = '浅色';
+          btn.title = '切换到浅色模式';
+        }
+      }
+      
+      colorInput.addEventListener('input', function() {
+        const value = this.value;
+        if (/^#[0-9A-F]{6}$/i.test(value)) {
+          currentPrimaryColor = value.toUpperCase();
+          primaryColorPicker.style.backgroundColor = currentPrimaryColor;
+          generateAllPalettes();
+        }
+      });
+      
+      primaryColorPicker.addEventListener('click', function() {
+        // 显示色盘选择器
+        const modal = document.getElementById('colorPickerModal');
+        modal.classList.add('show');
+        
+        // 设置当前颜色到色盘
+        if (colorPicker) {
+          colorPicker.setColor(currentPrimaryColor);
+        }
+      });
+      
+      document.getElementById('styleTheme').addEventListener('change', function() {
+        generateAllPalettes();
+      });
+      
+      document.getElementById('toggleThemeBtn').addEventListener('click', function() {
+        const isDark = document.body.classList.toggle('dark');
+        this.textContent = isDark ? '浅色' : '深色';
+        this.title = isDark ? '切换到浅色模式' : '切换到深色模式';
+        
+        // 保存主题偏好到localStorage，与探索模式同步
+        localStorage.setItem('preferredTheme', isDark ? 'dark' : 'light');
+        
+        showNotification('主题已切换');
+      });
+
+
+      document.getElementById('saveBtn').addEventListener('click', function() {
+        showSaveModal();
+      });
+
+      // 初始化色盘选择器
+      colorPicker = initColorPicker();
+      
+      // 色盘选择器事件
+      document.getElementById('closeColorPicker').addEventListener('click', function() {
+        document.getElementById('colorPickerModal').classList.remove('show');
+      });
+      
+      document.getElementById('cancelColor').addEventListener('click', function() {
+        document.getElementById('colorPickerModal').classList.remove('show');
+      });
+      
+              document.getElementById('confirmColor').addEventListener('click', function() {
+          const newColor = colorPicker.getCurrentColor();
+          currentPrimaryColor = newColor;
+          document.getElementById('primaryColorInput').value = newColor;
+          document.getElementById('primaryColorPicker').style.backgroundColor = newColor;
+          document.getElementById('colorPickerModal').classList.remove('show');
+          generateAllPalettes();
+          showNotification('主色已更新');
+        });
+
+        // 保存模态框按钮事件监听器
+        document.getElementById('saveCloseBtn').addEventListener('click', closeSaveModal);
+        document.getElementById('saveLocalBtn').addEventListener('click', saveCurrentPalettes);
+        document.getElementById('saveCSSBtn').addEventListener('click', saveAsCSS);
+        document.getElementById('saveJSONBtn').addEventListener('click', saveAsJSON);
+        document.getElementById('saveTXTBtn').addEventListener('click', saveAsTXT);
+
+        // 点击模态框外部关闭
+        document.getElementById('saveModal').addEventListener('click', function(e) {
+          if (e.target === this) {
+            closeSaveModal();
+          }
+        });
+      
+      // 点击模态框外部关闭
+      document.getElementById('colorPickerModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('show');
+        }
+      });
+      
+      generateAllPalettes();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        generateAllPalettes();
+        showNotification('配色已重新生成');
+      }
+    });
+  </script>
+</body>
+</html>

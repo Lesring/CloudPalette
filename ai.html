@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云彩配色 - AI配色助手</title>
+  <link rel="icon" type="image/svg+xml" href="CloudPalette.svg">
+  <link rel="alternate icon" type="image/x-icon" href="CloudPalette.ico">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 顶部工具栏 */
+    .toolbar {
+      background: white;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+    .logo img {
+      width: 22px;
+      height: 22px;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .action-btn {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      color: #666;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .action-btn:hover {
+      background: #f8f9fa;
+      border-color: #007bff;
+      color: #007bff;
+    }
+
+    /* 暗色模式 */
+    body.dark {
+      background: #2d2d2d;
+      color: #e6e6e6;
+    }
+
+    body.dark .toolbar {
+      background: #3a3a3a;
+      border-bottom: 1px solid #4a4a4a;
+      box-shadow: none;
+    }
+
+    body.dark .logo { color: #e6e6e6; }
+
+    body.dark .action-btn {
+      background: #3a3a3a;
+      color: #c8c8c8;
+      border-color: #4a4a4a;
+    }
+    body.dark .action-btn:hover {
+      background: #4a4a4a;
+      border-color: #4c8dff;
+      color: #4c8dff;
+    }
+
+    /* 主内容区域 */
+    .main-content {
+      flex: 1;
+      padding: 40px 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .ai-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .ai-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 12px;
+    }
+
+    .ai-header p {
+      font-size: 16px;
+      color: #666;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    body.dark .ai-header h1 { color: #e6e6e6; }
+    body.dark .ai-header p { color: #c8c8c8; }
+
+    /* AI功能卡片 */
+    .ai-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .ai-feature-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .ai-feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      border-color: #007bff;
+    }
+
+    .ai-feature-card.active {
+      border-color: #007bff;
+      background: #f8f9ff;
+    }
+
+    .ai-feature-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .ai-feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .ai-feature-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .ai-feature-desc {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    body.dark .ai-feature-card {
+      background: #3a3a3a;
+      border-color: #4a4a4a;
+    }
+
+    body.dark .ai-feature-card:hover {
+      border-color: #4c8dff;
+      box-shadow: 0 8px 25px rgba(76, 141, 255, 0.1);
+    }
+
+    body.dark .ai-feature-card.active {
+      border-color: #4c8dff;
+      background: #2a2a2a;
+    }
+
+    body.dark .ai-feature-title { color: #e6e6e6; }
+    body.dark .ai-feature-desc { color: #c8c8c8; }
+
+    /* AI工作区域 */
+    .ai-workspace {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 32px;
+      min-height: 400px;
+    }
+
+    .ai-workspace-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .ai-workspace-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .ai-workspace-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* 输入区域 */
+    .ai-input-section {
+      margin-bottom: 24px;
+    }
+
+    .ai-input-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .ai-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .ai-input:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .ai-input.color-input {
+      min-height: 60px;
+      font-family: monospace;
+    }
+
+    /* 按钮 */
+    .ai-btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ai-btn.primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .ai-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .ai-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* 结果区域 */
+    .ai-result-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .ai-result-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 16px;
+    }
+
+    .ai-result-content {
+      background: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 100px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .ai-result-content.loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
+
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e9ecef;
+      border-top: 2px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 12px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* 配色展示 */
+    .palette-preview {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .palette-color {
+      flex: 1;
+      height: 60px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .palette-color:hover {
+      transform: scale(1.05);
+    }
+
+    /* 暗色模式适配 */
+    body.dark .ai-workspace {
+      background: #3a3a3a;
+      border-color: #4a4a4a;
+    }
+
+    body.dark .ai-workspace-header {
+      border-bottom-color: #4a4a4a;
+    }
+
+    body.dark .ai-workspace-title { color: #e6e6e6; }
+
+    body.dark .ai-input-label { color: #e6e6e6; }
+
+    body.dark .ai-input {
+      background: #2a2a2a;
+      color: #e6e6e6;
+      border-color: #4a4a4a;
+    }
+
+    body.dark .ai-input:focus {
+      border-color: #4c8dff;
+    }
+
+    body.dark .ai-result-content {
+      background: #2a2a2a;
+      border-color: #4a4a4a;
+      color: #e6e6e6;
+    }
+
+    body.dark .ai-result-title { color: #e6e6e6; }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 20px 16px;
+      }
+
+      .ai-header h1 {
+        font-size: 24px;
+      }
+
+      .ai-features {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .ai-workspace {
+        padding: 20px;
+      }
+    }
+
+    /* 隐藏/显示功能 */
+    .ai-feature-content {
+      display: none;
+    }
+
+    .ai-feature-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部工具栏 -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="logo"><img src="CloudPalette.svg" alt="CloudPalette Logo"> 云彩AI配色助手</div>
+    </div>
+    <div class="toolbar-right">
+      <a href="index.html" class="action-btn">🏠 返回主页</a>
+      <button class="action-btn" id="toggleThemeBtn" title="切换暗色模式">🌓</button>
+    </div>
+  </div>
+
+  <!-- 主内容区域 -->
+  <div class="main-content">
+    <div class="ai-header">
+      <h1>云彩AI配色助手</h1>
+      <p>利用人工智能技术，为您提供专业的颜色分析和配色建议</p>
+    </div>
+
+    <!-- AI功能卡片 -->
+    <div class="ai-features">
+      <div class="ai-feature-card" data-feature="color-analysis">
+        <div class="ai-feature-header">
+          <div class="ai-feature-icon">🎨</div>
+          <div>
+            <div class="ai-feature-title">AI颜色分析</div>
+            <div class="ai-feature-desc">分析单个颜色的属性、情感和用途</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-feature-card" data-feature="palette-analysis">
+        <div class="ai-feature-header">
+          <div class="ai-feature-icon">🔍</div>
+          <div>
+            <div class="ai-feature-title">AI配色分析</div>
+            <div class="ai-feature-desc">分析配色方案的和谐度和适用场景</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-feature-card" data-feature="text-to-color">
+        <div class="ai-feature-header">
+          <div class="ai-feature-icon">✨</div>
+          <div>
+            <div class="ai-feature-title">文字生成配色</div>
+            <div class="ai-feature-desc">根据描述文字智能生成配色方案</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-feature-card" data-feature="color-suggestion">
+        <div class="ai-feature-header">
+          <div class="ai-feature-icon">💡</div>
+          <div>
+            <div class="ai-feature-title">智能配色建议</div>
+            <div class="ai-feature-desc">基于现有颜色推荐最佳搭配方案</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI工作区域 -->
+    <div class="ai-workspace">
+      <div class="ai-feature-content active" id="color-analysis-content">
+        <div class="ai-workspace-header">
+          <div class="ai-workspace-icon">🎨</div>
+          <div class="ai-workspace-title">AI颜色分析</div>
+        </div>
+        
+        <div class="ai-input-section">
+          <label class="ai-input-label">选择要分析的颜色：</label>
+          <input type="text" class="ai-input color-input" id="analysisColorInput" placeholder="输入颜色代码，如：#ff6b6b" value="#ff6b6b">
+        </div>
+
+        <button class="ai-btn primary" id="analyzeColorBtn">
+          <span>🔍</span>
+          分析颜色
+        </button>
+
+        <div class="ai-result-section">
+          <div class="ai-result-title">分析结果</div>
+          <div class="ai-result-content" id="colorAnalysisResult">
+            点击"分析颜色"按钮开始分析...
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-feature-content" id="palette-analysis-content">
+        <div class="ai-workspace-header">
+          <div class="ai-workspace-icon">🔍</div>
+          <div class="ai-workspace-title">AI配色分析</div>
+        </div>
+        
+        <div class="ai-input-section">
+          <label class="ai-input-label">输入配色方案（每行一个颜色代码）：</label>
+          <textarea class="ai-input" id="paletteAnalysisInput" placeholder="#ff6b6b&#10;#4ecdc4&#10;#45b7d1&#10;#96ceb4&#10;#ffeaa7">#ff6b6b
+#4ecdc4
+#45b7d1
+#96ceb4
+#ffeaa7</textarea>
+        </div>
+
+        <button class="ai-btn primary" id="analyzePaletteBtn">
+          <span>🔍</span>
+          分析配色
+        </button>
+
+        <div class="ai-result-section">
+          <div class="ai-result-title">分析结果</div>
+          <div class="ai-result-content" id="paletteAnalysisResult">
+            点击"分析配色"按钮开始分析...
+          </div>
+        </div>
+      </div>
+
+      <div class="ai-feature-content" id="text-to-color-content">
+        <div class="ai-workspace-header">
+          <div class="ai-workspace-icon">✨</div>
+          <div class="ai-workspace-title">文字生成配色</div>
+        </div>
+        
+        <div class="ai-input-section">
+          <label class="ai-input-label">描述您想要的配色风格：</label>
+          <textarea class="ai-input" id="textToColorInput" placeholder="例如：现代简约的科技感配色，主色调为蓝色，搭配白色和灰色，体现专业和信任感">现代简约的科技感配色，主色调为蓝色，搭配白色和灰色，体现专业和信任感</textarea>
+        </div>
+
+        <button class="ai-btn primary" id="generateFromTextBtn">
+          <span>✨</span>
+          生成配色
+        </button>
+
+        <div class="ai-result-section">
+          <div class="ai-result-title">生成的配色方案</div>
+          <div class="ai-result-content" id="textToColorResult">
+            点击"生成配色"按钮开始生成...
+          </div>
+          <div class="palette-preview" id="textToColorPreview"></div>
+        </div>
+      </div>
+
+      <div class="ai-feature-content" id="color-suggestion-content">
+        <div class="ai-workspace-header">
+          <div class="ai-workspace-icon">💡</div>
+          <div class="ai-workspace-title">智能配色建议</div>
+        </div>
+        
+        <div class="ai-input-section">
+          <label class="ai-input-label">输入基础颜色：</label>
+          <input type="text" class="ai-input color-input" id="suggestionColorInput" placeholder="输入颜色代码" value="#ff6b6b">
+        </div>
+
+        <button class="ai-btn primary" id="getSuggestionBtn">
+          <span>💡</span>
+          获取建议
+        </button>
+
+        <div class="ai-result-section">
+          <div class="ai-result-title">配色建议</div>
+          <div class="ai-result-content" id="colorSuggestionResult">
+            点击"获取建议"按钮开始分析...
+          </div>
+          <div class="palette-preview" id="colorSuggestionPreview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 主题切换
+    function toggleTheme() {
+      const isDark = document.body.classList.toggle('dark');
+      const btn = document.getElementById('toggleThemeBtn');
+      if (btn) {
+        btn.textContent = isDark ? '🌞' : '🌓';
+        btn.title = isDark ? '切换到亮色模式' : '切换到暗色模式';
+      }
+      localStorage.setItem('preferredTheme', isDark ? 'dark' : 'light');
+    }
+
+    // 功能切换
+    function switchFeature(featureName) {
+      // 移除所有活动状态
+      document.querySelectorAll('.ai-feature-card').forEach(card => {
+        card.classList.remove('active');
+      });
+      document.querySelectorAll('.ai-feature-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // 激活选中的功能
+      const selectedCard = document.querySelector(`[data-feature="${featureName}"]`);
+      const selectedContent = document.getElementById(`${featureName}-content`);
+      
+      if (selectedCard) selectedCard.classList.add('active');
+      if (selectedContent) selectedContent.classList.add('active');
+    }
+
+    // 颜色分析功能
+    function analyzeColor(color) {
+      const result = document.getElementById('colorAnalysisResult');
+      result.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在分析颜色...</div>';
+      
+      // 模拟AI分析过程
+      setTimeout(() => {
+        const analysis = `
+          <h4>颜色属性</h4>
+          <p><strong>十六进制：</strong> ${color}</p>
+          <p><strong>RGB：</strong> (255, 107, 107)</p>
+          <p><strong>HSL：</strong> (0°, 100%, 71%)</p>
+          
+          <h4>颜色特征</h4>
+          <p><strong>色相：</strong> 红色</p>
+          <p><strong>饱和度：</strong> 高饱和度</p>
+          <p><strong>明度：</strong> 中等明度</p>
+          
+          <h4>情感联想</h4>
+          <p>热情、活力、激情、危险、爱情</p>
+          
+          <h4>适用场景</h4>
+          <p>品牌标识、警告提示、促销活动、食品行业</p>
+        `;
+        
+        result.innerHTML = analysis;
+      }, 2000);
+    }
+
+    // 配色分析功能
+    function analyzePalette(colors) {
+      const result = document.getElementById('paletteAnalysisResult');
+      result.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在分析配色方案...</div>';
+      
+      setTimeout(() => {
+        const analysis = `
+          <h4>配色方案概览</h4>
+          <p><strong>颜色数量：</strong> ${colors.length}个</p>
+          <p><strong>配色类型：</strong> 混合配色</p>
+          
+          <h4>和谐度分析</h4>
+          <p><strong>整体和谐度：</strong> 85/100</p>
+          <p><strong>对比度：</strong> 中等对比度</p>
+          <p><strong>饱和度平衡：</strong> 平衡</p>
+          
+          <h4>适用场景</h4>
+          <p>适用于现代简约设计、品牌标识、网页设计等场景。</p>
+          
+          <h4>改进建议</h4>
+          <p>建议适当调整明度对比，增加层次感。</p>
+        `;
+        
+        result.innerHTML = analysis;
+      }, 2500);
+    }
+
+    // 文字生成配色功能
+    function generateFromText(text) {
+      const result = document.getElementById('textToColorResult');
+      const preview = document.getElementById('textToColorPreview');
+      
+      result.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在根据描述生成配色方案...</div>';
+      preview.innerHTML = '';
+      
+      setTimeout(() => {
+        const colors = ['#1e3a8a', '#3b82f6', '#60a5fa', '#93c5fd', '#dbeafe'];
+        const analysis = `
+          <h4>生成的配色方案</h4>
+          <p><strong>描述：</strong> ${text}</p>
+          <p><strong>颜色数量：</strong> 5个</p>
+          <p><strong>配色理念：</strong> 基于现代设计理念，注重色彩和谐与视觉平衡。</p>
+        `;
+        
+        result.innerHTML = analysis;
+        
+        // 显示颜色预览
+        preview.innerHTML = colors.map(color => 
+          `<div class="palette-color" style="background: ${color}" title="${color}">${color}</div>`
+        ).join('');
+      }, 3000);
+    }
+
+    // 智能配色建议功能
+    function getColorSuggestion(baseColor) {
+      const result = document.getElementById('colorSuggestionResult');
+      const preview = document.getElementById('colorSuggestionPreview');
+      
+      result.innerHTML = '<div class="loading"><div class="loading-spinner"></div>正在生成配色建议...</div>';
+      preview.innerHTML = '';
+      
+      setTimeout(() => {
+        const suggestions = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+        const analysis = `
+          <h4>配色建议</h4>
+          <p><strong>基础颜色：</strong> ${baseColor}</p>
+          <p><strong>配色类型：</strong> 互补色配色</p>
+          <p><strong>建议说明：</strong> 互补色配色能够创造强烈的视觉对比，适合需要突出重要元素的场景。</p>
+        `;
+        
+        result.innerHTML = analysis;
+        
+        // 显示建议颜色预览
+        preview.innerHTML = suggestions.map(color => 
+          `<div class="palette-color" style="background: ${color}" title="${color}">${color}</div>`
+        ).join('');
+      }, 2000);
+    }
+
+    // 事件监听器
+    document.addEventListener('DOMContentLoaded', function() {
+      // 主题切换
+      const themeBtn = document.getElementById('toggleThemeBtn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', toggleTheme);
+      }
+
+      // 恢复主题偏好
+      const savedTheme = localStorage.getItem('preferredTheme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark');
+        if (themeBtn) {
+          themeBtn.textContent = '🌞';
+          themeBtn.title = '切换到亮色模式';
+        }
+      }
+
+      // 功能切换
+      document.querySelectorAll('.ai-feature-card').forEach(card => {
+        card.addEventListener('click', function() {
+          const feature = this.getAttribute('data-feature');
+          switchFeature(feature);
+        });
+      });
+
+      // 颜色分析功能
+      const analyzeColorBtn = document.getElementById('analyzeColorBtn');
+      const analysisColorInput = document.getElementById('analysisColorInput');
+
+      if (analyzeColorBtn) {
+        analyzeColorBtn.addEventListener('click', function() {
+          const color = analysisColorInput.value;
+          if (color && /^#[0-9A-F]{6}$/i.test(color)) {
+            analyzeColor(color);
+          } else {
+            alert('请输入有效的颜色代码！');
+          }
+        });
+      }
+
+      // 配色分析功能
+      const analyzePaletteBtn = document.getElementById('analyzePaletteBtn');
+      const paletteAnalysisInput = document.getElementById('paletteAnalysisInput');
+
+      if (analyzePaletteBtn) {
+        analyzePaletteBtn.addEventListener('click', function() {
+          const input = paletteAnalysisInput.value;
+          const colors = input.split('\n').filter(line => /^#[0-9A-F]{6}$/i.test(line.trim()));
+          
+          if (colors.length > 0) {
+            analyzePalette(colors);
+          } else {
+            alert('请输入有效的颜色代码！');
+          }
+        });
+      }
+
+      // 文字生成配色功能
+      const generateFromTextBtn = document.getElementById('generateFromTextBtn');
+      const textToColorInput = document.getElementById('textToColorInput');
+
+      if (generateFromTextBtn) {
+        generateFromTextBtn.addEventListener('click', function() {
+          const text = textToColorInput.value.trim();
+          
+          if (text) {
+            generateFromText(text);
+          } else {
+            alert('请输入描述文字！');
+          }
+        });
+      }
+
+      // 智能配色建议功能
+      const getSuggestionBtn = document.getElementById('getSuggestionBtn');
+      const suggestionColorInput = document.getElementById('suggestionColorInput');
+
+      if (getSuggestionBtn) {
+        getSuggestionBtn.addEventListener('click', function() {
+          const color = suggestionColorInput.value;
+          
+          if (color && /^#[0-9A-F]{6}$/i.test(color)) {
+            getColorSuggestion(color);
+          } else {
+            alert('请输入有效的颜色代码！');
+          }
+        });
+      }
+
+      // 颜色预览点击复制
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('palette-color')) {
+          const color = e.target.getAttribute('title');
+          navigator.clipboard.writeText(color).then(() => {
+            // 显示复制成功提示
+            const originalText = e.target.textContent;
+            e.target.textContent = '已复制!';
+            setTimeout(() => {
+              e.target.textContent = originalText;
+            }, 1000);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
